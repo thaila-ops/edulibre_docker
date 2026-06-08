@@ -1,0 +1,31 @@
+.professores-container{
+    margin-top: 100px;
+    padding: 40px 60px;
+    background: #f4efe7;
+}
+
+.card-professor{
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.card-professor h3{
+    color: #3d4c5a;
+}
+
+.card-professor p{
+    color: #666;
+}
+
+.agendar-btn{
+    margin-top: 10px;
+    background: #c9a36b;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: white;
+}

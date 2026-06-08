@@ -1,0 +1,372 @@
+/* BASE */
+.home {
+  font-family: 'Jost', sans-serif;
+  background: linear-gradient(to bottom, #f8f5f0, #f3ece4);
+  color: #4a3425;
+}
+
+/* HERO */
+.hero {
+  padding: 100px 80px;
+  background: linear-gradient(to right, #f8f5f0, #f3ece4);
+}
+
+.hero_container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.hero_left {
+  max-width: 520px;
+  animation: fadeUp 1s ease;
+}
+
+.hero h1 {
+  font-family: "Playfair Display", serif;
+  font-size: 54px;
+  line-height: 1.2;
+}
+
+.hero span {
+  color:  #643d02;
+  font-style: italic;
+}
+
+.hero p {
+  margin: 25px 0;
+  color: #1d1a17;
+}
+
+
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 100px 80px;
+  background: url('../assets/moca.png') right 3% / cover no-repeat;
+  background-size: 85%;
+ box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+  background-color: #f8f5f0;
+  overflow: hidden;
+}
+
+/* OVERLAY (fica no meio) */
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+   background: linear-gradient(
+    to right,
+    rgba(248,245,240,0.95) 30%,
+    rgba(248,245,240,0.2) 55%,
+    rgba(248,245,240,0.1) 100%
+  ); 
+  
+}
+
+.hero_left {
+  position: relative;
+  z-index: 2; 
+  max-width: 600px;
+}
+
+
+.search_box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+justify-content: space-between;
+  padding: 8px;
+  border-radius: 50px;
+
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+
+  box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+  transition: 0.3s;
+}
+
+
+.search_box:hover {
+  box-shadow: 0 25px 60px rgba(0,0,0,0.12);
+}
+
+
+.search_box input {
+  flex: 1;
+  padding: 16px 20px;
+
+  border: none;
+  outline: none;
+  background: transparent;
+
+  font-size: 16px;
+  color: #5a3e2b;
+}
+
+
+.search_box input::placeholder {
+  color: #a89c90;
+}
+
+
+.search_box button {
+  padding: 14px 28px;
+  border-radius: 40px;
+  border: none;
+margin-left: auto;
+
+  background: linear-gradient(135deg, #c9a36b, #b8915c);
+  color: white;
+
+  font-weight: 500;
+  cursor: pointer;
+
+  transition: 0.3s;
+}
+
+.search_box button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(201,163,107,0.3);
+}
+/* BENEFITS */
+.benefits {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  padding: 100px 40px;
+  flex-wrap: wrap;
+}
+
+.benefit_card {
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(12px);
+  padding: 30px;
+  border-radius: 20px;
+  max-width: 300px;
+  text-align: center;
+  transition: 0.4s;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.benefit_card:hover {
+  transform: translateY(-10px) scale(1.02);
+}
+
+.benefit_card h3 {
+  font-family: "Playfair Display", serif;
+  margin-bottom: 10px;
+}
+.about {
+  padding: 120px 80px;
+  background: #fff;
+}
+
+.about_container {
+  display: flex;
+  align-items: center;
+  gap: 60px;
+}
+
+.about_image {
+  width: 450px;
+  height: 380px;
+  border-radius: 25px;
+  background: url('../assets/logo.png') center/cover no-repeat;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+}
+
+.about_text {
+  max-width: 500px;
+}
+
+.about h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 36px;
+  margin-bottom: 20px;
+  text-shadow: 3px 3px 6px rgba(0,0,0,0.30);
+}
+
+.about p {
+  color: #7a6f66;
+  margin-bottom: 15px;
+  line-height: 1.6;
+}
+
+.about button {
+  margin-top: 20px;
+  padding: 14px 25px;
+  border: none;
+  border-radius: 30px;
+  background: #643d02;
+  color: white;
+}
+
+/* SEÇÕES */
+.teachers {
+  padding: 100px 20px;
+  text-align: center;
+}
+
+.teachers h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 36px;
+  margin-bottom: 50px;
+}
+
+/* GRID */
+.teachers_grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  padding: 0 80px;
+}
+
+/* CARD */
+.teacher_card {
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 20px;
+  transition: 0.4s;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+.teacher_card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.4), transparent);
+  opacity: 0;
+  transition: 0.4s;
+  pointer-events: none;
+}
+
+.teacher_card:hover::after {
+  opacity: 1;
+}
+
+.teacher_card:hover {
+  transform: translateY(-10px);
+}
+
+.teacher_img {
+  width: 100%;
+  height: 180px;
+  border-radius: 12px;
+  object-fit: cover;
+  margin-bottom: 15px;
+}
+
+.teacher_card h4 {
+  font-family: "Playfair Display", serif;
+  margin-bottom: 5px; 
+  text-shadow: 3px 3px 6px rgba(0,0,0,0.30);
+}
+
+.teacher_card span {
+  color:  #6e4302;
+  font-weight: 500;
+ 
+}
+
+.muted {
+  color: #999;
+  font-size: 14px;
+  margin: 10px 0;
+}
+
+.teacher_card button {
+  background: linear-gradient(135deg, #b8915c);
+  border: none;
+  padding: 10px 20px;
+  color: white;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.teacher_card button:hover {
+  transform: scale(1.05);
+}
+
+/* STEPS */
+.steps {
+  padding: 100px 20px;
+  text-align: center;
+}
+
+.steps h2 {
+  font-family: "Playfair Display", serif;
+  margin-bottom: 50px;
+}
+
+.steps_grid {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.step {
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(10px);
+  padding: 30px;
+  border-radius: 20px;
+  width: 220px;
+  transition: 0.3s;
+}
+
+.step:hover {
+  transform: translateY(-8px);
+}
+
+.step h3 {
+  font-size: 30px;
+  color:  #4d2f02;
+}
+
+/* CTA */
+.cta {
+  padding: 120px 20px;
+  text-align: center;
+  background: linear-gradient(to right, #f3ece4, #f8f5f0);
+}
+
+.cta h2 {
+  font-family: "Playfair Display", serif;
+  margin-bottom: 20px;
+}
+
+.cta button {
+  background: linear-gradient(135deg, #643d02, #b8915c);
+  color: white;
+  border: none;
+  padding: 16px 35px;
+  border-radius: 40px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.cta button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(201,163,107,0.3);
+}
+
+/* ANIMAÇÃO */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
