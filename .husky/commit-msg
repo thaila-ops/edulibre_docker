@@ -1,0 +1,20 @@
+message="$(cat $1)"
+requiredPattern="^(feat|add|cut|fix|bump|make|start|stop|refactor|reformat|optimise|document|merge) .*$"
+if ! [[ $message =~ $requiredPattern ]];
+then
+  echo "-"
+  echo "-"
+  echo "-"
+  echo " Mensagem de commit incorreta! "
+  echo "A mensagem de commit deve ter este formato:"
+   echo "<verbo no modo imperativo> <o que foi feito>"
+    echo "Verbos permitidos no modo imperativo: feat, add, cut, fix, bump, make, start, stop, refactor, reformat, optimise, document, merge"
+    echo "Exemplo: add login button"    
+    echo "-"
+    echo "Sua mensagem de commit foi:"
+    echo $message
+    echo "-"
+echo "Para mais informações, consulte o script em .husky/commit-msg"
+  echo "-"
+  exit 1
+fi

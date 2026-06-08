@@ -11,6 +11,8 @@
 # production
 /build
 
+.env
+
 # misc
 .DS_Store
 .env.local
@@ -24,3 +26,11 @@ yarn-error.log*
 frontend/node_modules
 frontend/.env_example
 frontend/.env
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
