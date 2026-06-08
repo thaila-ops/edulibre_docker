@@ -1,0 +1,2 @@
+cd EduLibre_FrontEnd-main
+npx playwright test

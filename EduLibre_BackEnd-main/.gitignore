@@ -1,4 +1,5 @@
 .env
+dist/
 Edulibre_BackEnd-main/covarage
 
 Edulibre_BackEnd-main/node_modules

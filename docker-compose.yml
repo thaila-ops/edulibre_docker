@@ -11,7 +11,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql  
     networks:
-      - app_network
+      - internal_network
     healthcheck:
       test: ["CMD", "mysql", "-u", "app", "-p123456", "-e", "SELECT 1 FROM information_schema.schemata WHERE schema_name='edulivre'"]
       interval: 10s

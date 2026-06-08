@@ -1,4 +1,1 @@
-npm test
-
-cd EduLibre_FrontEnd-main
-npx playwright test
+cd EduLibre_BackEnd-main && npm test
