@@ -12,6 +12,7 @@ import authMiddleware from './middlewares/auth.middleware';
 import HttpError from './utils/http-error';
 
 const app = express();
+app.set('trust proxy', 1);
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -20,7 +21,7 @@ const limiter = rateLimit({
 });
 
 app.use(express.json({ limit: '5mb' }));
-app.use(cors({ origin: ['http://localhost:3000'], credentials: false }));
+app.use(cors({ origin: ['http://localhost:3000', 'https://edulibre.local'], credentials: false }));
 app.use(limiter);
 
 app.get('/', AuthController.health);
@@ -52,6 +53,7 @@ app.patch('/agendamentos/:id/pagar', authMiddleware, AgendamentosController.pay)
 app.delete('/agendamentos/:id', authMiddleware, AgendamentosController.remove);
 
 app.use((error: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error('ERRO CAPTURADO:', error.message, error.stack);
   if (error instanceof HttpError) {
     return res.status(error.statusCode).json({ message: error.message });
   }

@@ -44,9 +44,11 @@ services:
       context: ./EduLibre_FrontEnd-main
       dockerfile: Dockerfile
       args:
-          REACT_APP_API_URL: https://edulibre.local/api
+        REACT_APP_API_URL: https://edulibre.local/api
     container_name: frontend_service
-    restart: always
+    restart: "no"
+    volumes:
+      - frontend_build:/usr/share/nginx/html
     networks:
       - internal_network
     depends_on:
