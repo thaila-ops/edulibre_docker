@@ -9,15 +9,19 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
-      - mysql_data:/var/lib/mysql  
-    networks:
-      - internal_network
+      - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysql", "-u", "app", "-p123456", "-e", "SELECT 1 FROM information_schema.schemata WHERE schema_name='edulivre'"]
+      test:
+        [
+          "CMD-SHELL",
+          "mysql -h localhost -u$$MYSQL_USER -p$$MYSQL_PASSWORD -e 'SELECT 1' || exit 1"
+        ]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 60s
+    networks:
+      - internal_network
 
   backend:
     build:
@@ -32,13 +36,11 @@ services:
       DB_NAME: ${DB_NAME:-edulivre}
       DB_USER: ${DB_USER:-app}
       DB_PASS: ${DB_PASS}
-   
     networks:
       - internal_network
     depends_on:
       database:
         condition: service_healthy
-
   frontend:
     build:
       context: ./EduLibre_FrontEnd-main

@@ -1,5 +1,5 @@
 {
-  "name": "edulivre-frontend",
+  "name": "edulibre-frontend",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -23,7 +23,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+ "test:e2e": "docker compose down -v && docker compose up -d && npx wait-on https://edulibre.local --insecure --timeout 60000 && npx playwright test --workers=1"
   },
   "eslintConfig": {
     "extends": [
@@ -44,6 +45,7 @@
     ]
   },
   "devDependencies": {
-    "@playwright/test": "^1.60.0"
+    "@playwright/test": "^1.61.0",
+    "wait-on": "^8.0.5"
   }
 }
