@@ -20,6 +20,7 @@ type AulaFilters = {
   professorId?: string;
   page?: string;
   pageSize?: string;
+  status?: string;
 };
 
 const AULA_INCLUDE = [
@@ -32,7 +33,7 @@ export default class AulaService {
   public static async list(filters: AulaFilters) {
     const pageRequest = getPageRequest(filters.page, filters.pageSize);
     const result = await Aula.findAndCountAll({
-      where: AulaService.buildWhere(filters.materia, filters.professorId),
+      where: AulaService.buildWhere(filters.materia, filters.professorId, filters.status),
       include: AULA_INCLUDE,
       limit: pageRequest.limit,
       offset: pageRequest.offset,
@@ -43,13 +44,32 @@ export default class AulaService {
   }
 
   public static async featured() {
-    const lessons = await Aula.findAll({ include: AULA_INCLUDE, limit: 3, order: [['id', 'DESC']] });
+    const lessons = await Aula.findAll({
+      where: { status: 'ativa' },
+      include: AULA_INCLUDE,
+      limit: 3,
+      order: [['id', 'DESC']],
+    });
     return lessons.map((item) => AulaService.serialize(item));
+  }
+
+  public static async block(id: number, motivo: string) {
+    const aula = await Aula.findByPk(id);
+    if (!aula) throw new HttpError(404, 'Aula não encontrada.');
+    await aula.update({ status: 'bloqueada', motivoBloqueio: requireText(motivo, 'Motivo do bloqueio') });
+    return AulaService.findById(aula.id);
+  }
+
+  public static async unblock(id: number) {
+    const aula = await Aula.findByPk(id);
+    if (!aula) throw new HttpError(404, 'Aula não encontrada.');
+    await aula.update({ status: 'ativa', motivoBloqueio: null });
+    return AulaService.findById(aula.id);
   }
 
   public static async findById(id: number) {
     const aula = await Aula.findByPk(id, { include: AULA_INCLUDE });
-    if (!aula) throw new HttpError(404, 'Aula nÃ£o encontrada.');
+    if (!aula) throw new HttpError(404, 'Aula não encontrada.');
     return AulaService.serialize(aula);
   }
 
@@ -62,20 +82,20 @@ export default class AulaService {
   public static async update(id: number, payload: AulaPayload) {
     await AulaService.ensureProfessor(payload.professorId);
     const aula = await Aula.findByPk(id);
-    if (!aula) throw new HttpError(404, 'Aula nÃ£o encontrada.');
+    if (!aula) throw new HttpError(404, 'Aula não encontrada.');
     await aula.update(AulaService.buildPayload(payload));
     return AulaService.findById(aula.id);
   }
 
   public static async remove(id: number) {
     const aula = await Aula.findByPk(id);
-    if (!aula) throw new HttpError(404, 'Aula nÃ£o encontrada.');
+    if (!aula) throw new HttpError(404, 'Aula não encontrada.');
     await aula.destroy();
   }
 
   private static buildPayload(payload: AulaPayload) {
     return {
-      materia: requireText(payload.materia, 'MatÃ©ria'),
+      materia: requireText(payload.materia, 'Matéria'),
       valor: validatePositiveNumber(Number(payload.valor), 'Valor'),
       descricao: payload.descricao?.trim() || null,
       imageUrl: validateOptionalUrl(payload.imageUrl),
@@ -83,16 +103,18 @@ export default class AulaService {
     };
   }
 
-  private static buildWhere(materia?: string, professorId?: string) {
+  private static buildWhere(materia?: string, professorId?: string, status?: string) {
     return {
       ...(materia ? { materia: { [Op.like]: `%${materia.trim()}%` } } : {}),
       ...(professorId ? { professorId: Number(professorId) } : {}),
+      ...(status && status !== 'all' ? { status } : {}),
+      ...(!status ? { status: 'ativa' } : {}),
     };
   }
 
   private static async ensureProfessor(id: number) {
     const professor = await User.findByPk(Number(id));
-    if (!professor) throw new HttpError(400, 'Utilizador invÃ¡lido.');
+    if (!professor) throw new HttpError(400, 'Utilizador inválido.');
     ensureAdult(professor.dataNascimento, 'vender aulas');
   }
 
@@ -115,6 +137,8 @@ export default class AulaService {
       valor: plain.valor,
       descricao: plain.descricao,
       imageUrl: plain.imageUrl,
+      status: plain.status,
+      motivoBloqueio: plain.motivoBloqueio,
       professorId: plain.professorId,
       professor: plain.professor,
       reviewCount: reviews.length,

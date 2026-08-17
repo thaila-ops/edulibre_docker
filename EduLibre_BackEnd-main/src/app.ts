@@ -8,7 +8,9 @@ import AvaliacoesController from './controllers/avaliacoes.controller';
 import AulasController from './controllers/aulas.controller';
 import AgendamentosController from './controllers/agendamentos.controller';
 import UsersController from './controllers/users.controller';
+import AdminController from './controllers/admin.controller';
 import authMiddleware from './middlewares/auth.middleware';
+import adminMiddleware from './middlewares/admin.middleware';
 import HttpError from './utils/http-error';
 
 const app = express();
@@ -29,11 +31,13 @@ app.post('/login', AuthController.login);
 app.get('/auth/me', authMiddleware, AuthController.me);
 
 app.post('/usuarios', UsersController.create);
-app.get('/usuarios', authMiddleware, UsersController.findAll);
+app.get('/usuarios', authMiddleware, adminMiddleware, UsersController.findAll);
 app.get('/usuarios/me', authMiddleware, UsersController.profile);
 app.get('/usuarios/:id', authMiddleware, UsersController.getById);
 app.put('/usuarios/:id', authMiddleware, UsersController.update);
 app.delete('/usuarios/:id', authMiddleware, UsersController.remove);
+app.patch('/usuarios/:id/promover', authMiddleware, adminMiddleware, AdminController.promote);
+app.patch('/usuarios/:id/rebaixar', authMiddleware, adminMiddleware, AdminController.demote);
 
 app.get('/aulas', AulasController.findAll);
 app.get('/aulas/destaque', AulasController.featured);
@@ -42,6 +46,11 @@ app.get('/aulas/:id', AulasController.getById);
 app.put('/aulas/:id', authMiddleware, AulasController.update);
 app.delete('/aulas/:id', authMiddleware, AulasController.remove);
 app.post('/aulas/:id/avaliacoes', authMiddleware, AvaliacoesController.create);
+app.patch('/aulas/:id/bloquear', authMiddleware, adminMiddleware, AulasController.block);
+app.patch('/aulas/:id/desbloquear', authMiddleware, adminMiddleware, AulasController.unblock);
+
+app.get('/admin/dashboard', authMiddleware, adminMiddleware, AdminController.dashboard);
+app.get('/admin/aulas', authMiddleware, adminMiddleware, AulasController.findAllAdmin);
 
 app.get('/agendamentos', authMiddleware, AgendamentosController.findAll);
 app.post('/agendamentos', authMiddleware, AgendamentosController.create);

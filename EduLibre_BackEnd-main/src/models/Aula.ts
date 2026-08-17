@@ -9,6 +9,8 @@ class Aula extends Model<InferAttributes<Aula>, InferCreationAttributes<Aula>> {
   declare descricao: string | null;
   declare professorId: number;
   declare imageUrl: CreationOptional<string | null>;
+  declare status: CreationOptional<'ativa' | 'bloqueada'>;
+  declare motivoBloqueio: CreationOptional<string | null>;
 }
 
 Aula.init(
@@ -18,6 +20,8 @@ Aula.init(
     valor: { type: DataTypes.FLOAT, allowNull: false },
     descricao: { type: DataTypes.TEXT, allowNull: true },
     imageUrl: { type: DataTypes.TEXT('long'), allowNull: true, defaultValue: null },
+    status: { type: DataTypes.ENUM('ativa', 'bloqueada'), allowNull: false, defaultValue: 'ativa' },
+    motivoBloqueio: { type: DataTypes.TEXT, allowNull: true, defaultValue: null },
     professorId: {
       type: DataTypes.INTEGER,
       allowNull: false,

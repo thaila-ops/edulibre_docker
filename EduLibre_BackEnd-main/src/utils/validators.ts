@@ -12,30 +12,32 @@ function cleanValue(value: string) {
 
 export function requireText(value: string | undefined, field: string) {
   const cleaned = cleanValue(value ?? '');
-  if (!cleaned) throw new HttpError(400, `${field} Ã© obrigatÃ³rio.`);
+  if (!cleaned) throw new HttpError(400, `${field}  é obrigatório.`);
   return cleaned;
 }
 
 export function validateEmail(email: string) {
-  if (!EMAIL_REGEX.test(email)) throw new HttpError(400, 'E-mail invÃ¡lido.');
+  if (!EMAIL_REGEX.test(email)) throw new HttpError(400, 'E-mail invalido.');
   return email.toLowerCase();
 }
 
 export function validateCpf(cpf: string) {
   const cleaned = cpf.replace(/\D/g, '');
-  if (!CPF_REGEX.test(cleaned)) throw new HttpError(400, 'CPF invÃ¡lido. Use 11 dÃ­gitos.');
+  if (!CPF_REGEX.test(cleaned)) {
+    throw new HttpError(400, 'CPF invalido. Use 11 digitos.');
+  }
   return cleaned;
 }
 
 export function validatePassword(password: string) {
   const normalizedPassword = password.trim();
-  if (!PASSWORD_REGEX.test(normalizedPassword)) throw new HttpError(400, 'A senha deve ter 8+ caracteres, letra, nÃºmero e sÃ­mbolo.');
+  if (!PASSWORD_REGEX.test(normalizedPassword)) throw new HttpError(400, 'A senha deve ter 8+ caracteres, letra, numero e simbolo.');
   return normalizedPassword;
 }
 
 export function validateRole(tipo: string | undefined) {
   if (!tipo) return 'usuario';
-  if (tipo !== 'usuario') throw new HttpError(400, 'Tipo invÃ¡lido.');
+  if (tipo !== 'usuario' && tipo !== 'admin') throw new HttpError(400, 'Tipo invalido.');
   return tipo as UserRole;
 }
 
@@ -46,14 +48,14 @@ export function validatePositiveNumber(value: number, field: string) {
 
 export function validateDate(value: string) {
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) throw new HttpError(400, 'Data invÃ¡lida.');
+  if (Number.isNaN(date.getTime())) throw new HttpError(400, 'Data invalida.');
   return date;
 }
 
 export function validateBirthDate(value: string | undefined) {
   const requiredValue = requireText(value, 'Data de nascimento');
   const date = validateDate(requiredValue);
-  if (date > new Date()) throw new HttpError(400, 'Data de nascimento invÃ¡lida.');
+  if (date > new Date()) throw new HttpError(400, 'Data de nascimento invalida.');
   return date;
 }
 
@@ -97,7 +99,7 @@ export function validateOptionalUrl(value: string | undefined) {
 export function validateRating(value: number) {
   const rating = Number(value);
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
-    throw new HttpError(400, 'A nota deve ser um nÃºmero inteiro entre 1 e 5.');
+    throw new HttpError(400, 'A nota deve ser um numero inteiro entre 1 e 5.');
   }
   return rating;
 }
