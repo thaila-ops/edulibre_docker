@@ -1,9 +1,12 @@
-import type { JwtPayloadData } from './api';
+import type { JwtPayloadData, RbacContext } from './api';
 
 declare global {
   namespace Express {
     interface Request {
-      authUser?: JwtPayloadData;
+     authUser?: JwtPayloadData &
+      RbacContext & {
+    tipo: 'usuario' | 'admin';
+  };
     }
   }
 }

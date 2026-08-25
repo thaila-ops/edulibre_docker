@@ -5,6 +5,11 @@ import './models/User';
 import './models/Aula';
 import './models/Agendamento';
 import './models/Avaliacao';
+import './models/Role';
+import './models/Permission';
+import './models/RolePermission';
+import './models/UserRoleAssignment';
+import RbacService from './services/rbac.service';
 
 const port = Number(process.env.PORT) || 3001;
 
@@ -28,6 +33,8 @@ async function normalizeLegacyBirthDates() {
 async function startServer() {
   await normalizeLegacyBirthDates();
   await sequelize.sync({ alter: true });
+  await RbacService.seed();
+  await RbacService.migrateLegacyUsers();
   app.listen(port, () => console.log(`Servidor EduLivre rodando na porta ${port}`));
 }
 

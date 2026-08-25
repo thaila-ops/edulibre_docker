@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import UserService from '../services/user.service';
 import asyncHandler from '../utils/async-handler';
 import HttpError from '../utils/http-error';
+import RbacService from '../services/rbac.service';
 
 class UsersController {
   public static findAll = asyncHandler(async (req: Request, res: Response) => {
@@ -21,6 +22,9 @@ class UsersController {
 
   public static create = asyncHandler(async (req: Request, res: Response) => {
     const user = await UserService.create(req.body);
+
+    await RbacService.grantRole(user.id, 'aluno');
+
     res.status(201).json(user);
   });
 

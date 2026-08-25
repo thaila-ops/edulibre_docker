@@ -10,7 +10,7 @@ class AuthController {
 
   public static login = asyncHandler(async (req, res) => {
     const user = await UserService.authenticate(req.body.email, req.body.password);
-    const token = TokenService.sign({ id: user.id, email: user.email, tipo: user.tipo });
+   const token = TokenService.sign({id: user.id, email: user.email,});
     res.status(200).json({ message: 'Usuário autenticado.', token, user });
   });
 

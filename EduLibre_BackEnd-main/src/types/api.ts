@@ -24,5 +24,4 @@ export type PaginationResult<T> = {
 export type JwtPayloadData = {
   id: number;
   email: string;
-  tipo: UserRole;
 };

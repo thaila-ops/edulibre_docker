@@ -10,7 +10,7 @@ import AgendamentosController from './controllers/agendamentos.controller';
 import UsersController from './controllers/users.controller';
 import AdminController from './controllers/admin.controller';
 import authMiddleware from './middlewares/auth.middleware';
-import adminMiddleware from './middlewares/admin.middleware';
+import { requirePermission } from './middlewares/permission.middleware';
 import HttpError from './utils/http-error';
 
 const app = express();
@@ -31,13 +31,38 @@ app.post('/login', AuthController.login);
 app.get('/auth/me', authMiddleware, AuthController.me);
 
 app.post('/usuarios', UsersController.create);
-app.get('/usuarios', authMiddleware, adminMiddleware, UsersController.findAll);
+app.get('/usuarios', authMiddleware, requirePermission('usuarios.listar'),UsersController.findAll,);
 app.get('/usuarios/me', authMiddleware, UsersController.profile);
 app.get('/usuarios/:id', authMiddleware, UsersController.getById);
 app.put('/usuarios/:id', authMiddleware, UsersController.update);
 app.delete('/usuarios/:id', authMiddleware, UsersController.remove);
-app.patch('/usuarios/:id/promover', authMiddleware, adminMiddleware, AdminController.promote);
-app.patch('/usuarios/:id/rebaixar', authMiddleware, adminMiddleware, AdminController.demote);
+app.patch(
+  '/usuarios/:id/promover',
+  authMiddleware,
+  requirePermission('usuarios.papel.gerenciar'),
+  AdminController.promote,
+);
+
+app.patch(
+  '/usuarios/:id/rebaixar',
+  authMiddleware,
+  requirePermission('usuarios.papel.gerenciar'),
+  AdminController.demote,
+);
+
+app.patch(
+  '/usuarios/:id/papeis',
+  authMiddleware,
+  requirePermission('usuarios.papel.gerenciar'),
+  AdminController.grantRole,
+);
+
+app.delete(
+  '/usuarios/:id/papeis/:role',
+  authMiddleware,
+  requirePermission('usuarios.papel.gerenciar'),
+  AdminController.revokeRole,
+);
 
 app.get('/aulas', AulasController.findAll);
 app.get('/aulas/destaque', AulasController.featured);
