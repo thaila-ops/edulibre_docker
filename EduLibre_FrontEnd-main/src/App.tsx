@@ -6,7 +6,7 @@ import BookingFormPage from './pages/BookingFormPage';
 import BookingsPage from './pages/BookingsPage';
 import DashboardPage from './pages/DashboardPage';
 import HomePage from './pages/HomePage';
-import LessonDetailPage from './pages/LessonDetailPage';
+import LessonDetailPage from './pages/LessonDetailPage';  
 import LessonsPage from './pages/LessonsPage';
 import LoginPage from './pages/LoginPage';
 import MarketplacePage from './pages/MarketplacePage';
@@ -17,6 +17,7 @@ import UserFormPage from './pages/UserFormPage';
 import LessonFormPage from './pages/LessonFormPage';
 import LessonStudentsPage from './pages/LessonStudentsPage';
 import ReceivedBookingsPage from './pages/ReceivedBookingsPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
 
 function App() {
   return (
@@ -36,14 +37,14 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/agendamentos-recebidos"
-          element={
-            <ProtectedRoute>
-              <ReceivedBookingsPage />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+  path="/agendamentos-recebidos"
+  element={
+    <ProtectedRoute requiredRole="professor">
+      <ReceivedBookingsPage />
+    </ProtectedRoute>
+  }
+/>
         <Route
           path="/agendamentos/:id"
           element={
@@ -68,38 +69,38 @@ function App() {
             </ProtectedRoute>
           }
         />
+       <Route
+  path="/criar-aula"
+  element={
+    <ProtectedRoute requiredRole="professor">
+      <LessonFormPage />
+    </ProtectedRoute>
+  }
+/>
+       <Route
+  path="/minhas-aulas/:id/editar"
+  element={
+    <ProtectedRoute requiredRole="professor">
+      <LessonFormPage />
+    </ProtectedRoute>
+  }
+/>
         <Route
-          path="/criar-aula"
-          element={
-            <ProtectedRoute>
-              <LessonFormPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/minhas-aulas/:id/editar"
-          element={
-            <ProtectedRoute>
-              <LessonFormPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/minhas-aulas"
-          element={
-            <ProtectedRoute>
-              <LessonsPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/minhas-aulas/:id/alunos"
-          element={
-            <ProtectedRoute>
-              <LessonStudentsPage />
-            </ProtectedRoute>
-          }
-        />
+  path="/minhas-aulas"
+  element={
+    <ProtectedRoute requiredRole="professor">
+      <LessonsPage />
+    </ProtectedRoute>
+  }
+/>
+       <Route
+  path="/minhas-aulas/:id/alunos"
+  element={
+    <ProtectedRoute requiredRole="professor">
+      <LessonStudentsPage />
+    </ProtectedRoute>
+  }
+/>
         <Route
           path="/conta"
           element={
@@ -122,6 +123,14 @@ function App() {
             <ProtectedRoute>
               <UserFormPage />
             </ProtectedRoute>
+          }
+        />
+       <Route
+          path="/admin"
+           element={
+       <ProtectedRoute requiredRole="admin">
+       <AdminDashboardPage />
+       </ProtectedRoute>
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />

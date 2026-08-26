@@ -31,8 +31,9 @@ app.post('/login', AuthController.login);
 app.get('/auth/me', authMiddleware, AuthController.me);
 
 app.post('/usuarios', UsersController.create);
-app.get('/usuarios', authMiddleware, requirePermission('usuarios.listar'),UsersController.findAll,);
+app.get('/usuarios', authMiddleware, requirePermission('usuarios.listar'), UsersController.findAll,);
 app.get('/usuarios/me', authMiddleware, UsersController.profile);
+app.post('/usuarios/me/tornar-professor', authMiddleware, UsersController.tornarProfessor,);
 app.get('/usuarios/:id', authMiddleware, UsersController.getById);
 app.put('/usuarios/:id', authMiddleware, UsersController.update);
 app.delete('/usuarios/:id', authMiddleware, UsersController.remove);
@@ -66,19 +67,17 @@ app.delete(
 
 app.get('/aulas', AulasController.findAll);
 app.get('/aulas/destaque', AulasController.featured);
-app.post('/aulas', authMiddleware, AulasController.create);
+app.post('/aulas', authMiddleware, requirePermission('aulas.criar'), AulasController.create);
 app.get('/aulas/:id', AulasController.getById);
-app.put('/aulas/:id', authMiddleware, AulasController.update);
-app.delete('/aulas/:id', authMiddleware, AulasController.remove);
+app.put( '/aulas/:id', authMiddleware, requirePermission('aulas.editar_propria'), AulasController.update,);
+app.delete( '/aulas/:id', authMiddleware, requirePermission('aulas.excluir_propria'), AulasController.remove,);
 app.post('/aulas/:id/avaliacoes', authMiddleware, AvaliacoesController.create);
-app.patch('/aulas/:id/bloquear', authMiddleware, adminMiddleware, AulasController.block);
-app.patch('/aulas/:id/desbloquear', authMiddleware, adminMiddleware, AulasController.unblock);
-
-app.get('/admin/dashboard', authMiddleware, adminMiddleware, AdminController.dashboard);
-app.get('/admin/aulas', authMiddleware, adminMiddleware, AulasController.findAllAdmin);
-
+app.patch('/aulas/:id/bloquear', authMiddleware, requirePermission('aulas.bloquear'), AulasController.block,);
+app.patch('/aulas/:id/desbloquear', authMiddleware, requirePermission('aulas.desbloquear'), AulasController.unblock,);
+app.get( '/admin/dashboard', authMiddleware, requirePermission('admin.dashboard.visualizar'), AdminController.dashboard,);
+app.get( '/admin/aulas', authMiddleware, requirePermission('aulas.gerenciar_qualquer'), AulasController.findAllAdmin,);
 app.get('/agendamentos', authMiddleware, AgendamentosController.findAll);
-app.post('/agendamentos', authMiddleware, AgendamentosController.create);
+app.post('/agendamentos', authMiddleware, requirePermission('aulas.contratar'), AgendamentosController.create);
 app.get('/agendamentos/:id', authMiddleware, AgendamentosController.getById);
 app.put('/agendamentos/:id', authMiddleware, AgendamentosController.update);
 app.patch('/agendamentos/:id/aceitar', authMiddleware, AgendamentosController.accept);

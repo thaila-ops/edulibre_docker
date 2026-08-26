@@ -2,16 +2,28 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Feedback from '../components/Feedback';
 import { useAuth } from '../contexts/AuthContext';
-import { deleteLesson, fetchBookings, fetchLessons } from '../services/http';
+import { becomeProfessor, deleteLesson, fetchBookings, fetchLessons,} from '../services/http';
 import { Booking, Lesson } from '../types';
 import { getErrorMessage } from '../utils/validation';
 
 function DashboardPage() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [error, setError] = useState('');
+  
+  const isProfessor =
+  user?.isSuperAdmin ||
+  user?.roles?.includes('professor');
 
+async function handleBecomeProfessor() {
+  try {
+    await becomeProfessor();
+    await refreshUser();
+  } catch (submitError) {
+    setError(getErrorMessage(submitError));
+  }
+}
   useEffect(() => {
     if (!user) return;
 
@@ -46,9 +58,26 @@ function DashboardPage() {
         <h2>Olá, {user?.name}</h2>
         <p className="muted">{user?.bio ?? 'Você pode agendar aulas, vender aulas ou fazer os dois com a mesma conta.'}</p>
         <div className="hero-actions">
-          <Link className="primary-button" to="/criar-aula">Publicar aula</Link>
+         
           <Link className="secondary-button" to="/professores">Agendar aula</Link>
-          <Link className="secondary-button" to="/agendamentos-recebidos">Agendamentos recebidos</Link>
+         {isProfessor ? (
+  <>
+    <Link className="primary-button" to="/criar-aula">
+      Publicar aula
+    </Link>
+
+    <Link className="secondary-button" to="/agendamentos-recebidos">
+      Agendamentos recebidos
+    </Link>
+  </>
+) : (
+  <button
+    className="primary-button"
+    onClick={() => void handleBecomeProfessor()}
+  >
+    Quero publicar aulas
+  </button>
+)}
           <Link className="secondary-button" to="/perfil/editar">Editar foto de perfil</Link>
           <Link className="secondary-button" to="/perfil">Ver perfil</Link>
         </div>

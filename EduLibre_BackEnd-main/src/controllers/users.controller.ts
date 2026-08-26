@@ -48,9 +48,22 @@ class UsersController {
       throw new HttpError(403, 'Você só pode remover o próprio perfil.');
     }
 
+    await RbacService.ensureUserCanBeDeleted(targetUserId);
+
     await UserService.remove(targetUserId);
     res.status(204).send();
   });
+   
+  public static tornarProfessor = asyncHandler(
+  async (req: Request, res: Response) => {
+    const context = await RbacService.grantRole(
+      req.authUser!.id,
+      'professor',
+    );
+
+    res.status(200).json(context);
+  },
+);
 }
 
 export default UsersController;

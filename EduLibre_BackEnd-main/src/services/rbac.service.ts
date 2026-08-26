@@ -1,6 +1,7 @@
 import Permission from '../models/Permission';
 import Role from '../models/Role';
 import User from '../models/User';
+import '../models/RolePermission';
 import UserRoleAssignment from '../models/UserRoleAssignment';
 import { Op } from 'sequelize';
 import HttpError from '../utils/http-error';
@@ -133,6 +134,14 @@ export default class RbacService {
           await (role as any).addPermission(permission);
         }
       }
+    }
+  }
+
+  public static async ensureUserCanBeDeleted(userId: number) {
+    const context = await RbacService.getAuthContext(userId);
+
+    if (context.isSuperAdmin) {
+      await RbacService.ensureAnotherSuperAdminRemains(userId);
     }
   }
 

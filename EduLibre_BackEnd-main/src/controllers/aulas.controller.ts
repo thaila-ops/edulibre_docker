@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import AulaService from '../services/aula.service';
 import asyncHandler from '../utils/async-handler';
+import HttpError from '../utils/http-error';
 
 class AulasController {
   public static featured = asyncHandler(async (_req: Request, res: Response) => {
@@ -38,20 +39,47 @@ class AulasController {
     res.status(200).json(aula);
   });
 
-  public static create = asyncHandler(async (req: Request, res: Response) => {
-    const aula = await AulaService.create(req.body);
-    res.status(201).json(aula);
+ public static create = asyncHandler(async (req: Request, res: Response) => {
+  const aula = await AulaService.create({
+    ...req.body,
+    professorId: req.authUser!.id,
   });
 
-  public static update = asyncHandler(async (req: Request, res: Response) => {
-    const aula = await AulaService.update(Number(req.params.id), req.body);
-    res.status(200).json(aula);
+  res.status(201).json(aula);
+});
+
+ public static update = asyncHandler(async (req: Request, res: Response) => {
+  const aulaAtual = await AulaService.findById(Number(req.params.id));
+
+  if (aulaAtual.professorId !== req.authUser!.id) {
+    throw new HttpError(
+      403,
+      'Você só pode editar a própria aula.',
+    );
+  }
+
+  const aula = await AulaService.update(Number(req.params.id), {
+    ...req.body,
+    professorId: req.authUser!.id,
   });
 
-  public static remove = asyncHandler(async (req: Request, res: Response) => {
-    await AulaService.remove(Number(req.params.id));
-    res.status(204).send();
-  });
+  res.status(200).json(aula);
+});
+
+public static remove = asyncHandler(async (req: Request, res: Response) => {
+  const aulaAtual = await AulaService.findById(Number(req.params.id));
+
+  if (aulaAtual.professorId !== req.authUser!.id) {
+    throw new HttpError(
+      403,
+      'Você só pode excluir a própria aula.',
+    );
+  }
+
+  await AulaService.remove(Number(req.params.id));
+
+  res.status(204).send();
+});
 }
 
 export default AulasController;

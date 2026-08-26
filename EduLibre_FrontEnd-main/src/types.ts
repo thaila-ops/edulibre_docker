@@ -1,15 +1,18 @@
-export type UserRole = 'usuario';
+export type UserRole = 'usuario' | 'admin';
 
 export type User = {
   id: number;
   name: string;
-  email: string;
+  email: string;    
   cpf: string;
   dataNascimento: string | null;
   tipo: UserRole;
+  roles?: string[];
+  permissions?: string[];
+  isSuperAdmin?: boolean;
   avatarUrl: string | null;
   bio: string | null;
-};
+};  
 
 export type Review = {
   id: number;
@@ -58,4 +61,15 @@ export type LoginResponse = {
   message: string;
   token: string;
   user: User;
+};
+
+export type AdminDashboardStats = {
+  totalUsuarios: number;
+  totalAlunos: number;
+  totalProfessores: number;
+  totalAdmins: number;
+  totalModeradores: number;
+  totalAulas: number;
+  aulasAtivas: number;
+  aulasBloqueadas: number;
 };

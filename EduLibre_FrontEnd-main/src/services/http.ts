@@ -1,5 +1,14 @@
 import api from './api';
-import { Booking, Lesson, LoginResponse, PaginatedResponse, Review, User } from '../types';
+import {
+  AdminDashboardStats,
+  Booking,
+  Lesson,
+  LoginResponse,
+  PaginatedResponse,
+  Review,
+  User,
+} from '../types';
+
 
 type PaginationParams = {
   page?: number;
@@ -17,6 +26,9 @@ export async function loginRequest(email: string, password: string) {
 export async function fetchMe() {
   const response = await api.get<User>('/auth/me');
   return response.data;
+}
+export async function becomeProfessor() {
+  await api.post('/usuarios/me/tornar-professor');
 }
 
 export async function fetchUsers(params: PaginationParams) {
@@ -113,5 +125,13 @@ export async function deleteBooking(id: number) {
 
 export async function createReview(id: number, payload: { aulaId: number; alunoId: number; nota: number; comentario?: string }) {
   const response = await api.post<Review>(`/aulas/${id}/avaliacoes`, payload);
+  return response.data;
+}
+
+export async function fetchAdminDashboard() {
+  const response = await api.get<AdminDashboardStats>(
+    '/admin/dashboard',
+  );
+
   return response.data;
 }
