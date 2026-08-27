@@ -14,6 +14,8 @@ Aula.init({
     valor: { type: sequelize_1.DataTypes.FLOAT, allowNull: false },
     descricao: { type: sequelize_1.DataTypes.TEXT, allowNull: true },
     imageUrl: { type: sequelize_1.DataTypes.TEXT('long'), allowNull: true, defaultValue: null },
+    status: { type: sequelize_1.DataTypes.ENUM('ativa', 'bloqueada'), allowNull: false, defaultValue: 'ativa' },
+    motivoBloqueio: { type: sequelize_1.DataTypes.TEXT, allowNull: true, defaultValue: null },
     professorId: {
         type: sequelize_1.DataTypes.INTEGER,
         allowNull: false,

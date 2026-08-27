@@ -26,31 +26,32 @@ function cleanValue(value) {
 function requireText(value, field) {
     const cleaned = cleanValue(value ?? '');
     if (!cleaned)
-        throw new http_error_1.default(400, `${field} Ã© obrigatÃ³rio.`);
+        throw new http_error_1.default(400, `${field}  é obrigatório.`);
     return cleaned;
 }
 function validateEmail(email) {
     if (!EMAIL_REGEX.test(email))
-        throw new http_error_1.default(400, 'E-mail invÃ¡lido.');
+        throw new http_error_1.default(400, 'E-mail invalido.');
     return email.toLowerCase();
 }
 function validateCpf(cpf) {
     const cleaned = cpf.replace(/\D/g, '');
-    if (!CPF_REGEX.test(cleaned))
-        throw new http_error_1.default(400, 'CPF invÃ¡lido. Use 11 dÃ­gitos.');
+    if (!CPF_REGEX.test(cleaned)) {
+        throw new http_error_1.default(400, 'CPF invalido. Use 11 digitos.');
+    }
     return cleaned;
 }
 function validatePassword(password) {
     const normalizedPassword = password.trim();
     if (!PASSWORD_REGEX.test(normalizedPassword))
-        throw new http_error_1.default(400, 'A senha deve ter 8+ caracteres, letra, nÃºmero e sÃ­mbolo.');
+        throw new http_error_1.default(400, 'A senha deve ter 8+ caracteres, letra, numero e simbolo.');
     return normalizedPassword;
 }
 function validateRole(tipo) {
     if (!tipo)
         return 'usuario';
-    if (tipo !== 'usuario')
-        throw new http_error_1.default(400, 'Tipo invÃ¡lido.');
+    if (tipo !== 'usuario' && tipo !== 'admin')
+        throw new http_error_1.default(400, 'Tipo invalido.');
     return tipo;
 }
 function validatePositiveNumber(value, field) {
@@ -61,14 +62,14 @@ function validatePositiveNumber(value, field) {
 function validateDate(value) {
     const date = new Date(value);
     if (Number.isNaN(date.getTime()))
-        throw new http_error_1.default(400, 'Data invÃ¡lida.');
+        throw new http_error_1.default(400, 'Data invalida.');
     return date;
 }
 function validateBirthDate(value) {
     const requiredValue = requireText(value, 'Data de nascimento');
     const date = validateDate(requiredValue);
     if (date > new Date())
-        throw new http_error_1.default(400, 'Data de nascimento invÃ¡lida.');
+        throw new http_error_1.default(400, 'Data de nascimento invalida.');
     return date;
 }
 function normalizeDate(value) {
@@ -108,7 +109,7 @@ function validateOptionalUrl(value) {
 function validateRating(value) {
     const rating = Number(value);
     if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
-        throw new http_error_1.default(400, 'A nota deve ser um nÃºmero inteiro entre 1 e 5.');
+        throw new http_error_1.default(400, 'A nota deve ser um numero inteiro entre 1 e 5.');
     }
     return rating;
 }

@@ -40,15 +40,22 @@ class AulasController {
   });
 
  public static create = asyncHandler(async (req: Request, res: Response) => {
+  const imageUrl = req.file
+    ? `/uploads/${req.file.filename}`
+    : req.body.imageUrl;
+
   const aula = await AulaService.create({
     ...req.body,
+    imageUrl,
     professorId: req.authUser!.id,
   });
 
   res.status(201).json(aula);
 });
 
- public static update = asyncHandler(async (req: Request, res: Response) => {
+ 
+
+public static update = asyncHandler(async (req: Request, res: Response) => {
   const aulaAtual = await AulaService.findById(Number(req.params.id));
 
   if (aulaAtual.professorId !== req.authUser!.id) {
@@ -58,13 +65,20 @@ class AulasController {
     );
   }
 
+  const imageUrl = req.file
+    ? `/uploads/${req.file.filename}`
+    : req.body.imageUrl ?? aulaAtual.imageUrl;
+
   const aula = await AulaService.update(Number(req.params.id), {
     ...req.body,
+    imageUrl,
     professorId: req.authUser!.id,
   });
 
   res.status(200).json(aula);
 });
+
+  
 
 public static remove = asyncHandler(async (req: Request, res: Response) => {
   const aulaAtual = await AulaService.findById(Number(req.params.id));

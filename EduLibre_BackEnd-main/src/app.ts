@@ -12,6 +12,8 @@ import AdminController from './controllers/admin.controller';
 import authMiddleware from './middlewares/auth.middleware';
 import { requirePermission } from './middlewares/permission.middleware';
 import HttpError from './utils/http-error';
+import path from 'path';
+import upload from './config/upload';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -23,6 +25,10 @@ const limiter = rateLimit({
 });
 
 app.use(express.json({ limit: '5mb' }));
+app.use(
+  '/uploads',
+  express.static(path.resolve(process.cwd(), 'uploads')),
+);
 app.use(cors({ origin: ['http://localhost:3000', 'https://edulibre.local'], credentials: false }));
 app.use(limiter);
 
@@ -67,9 +73,9 @@ app.delete(
 
 app.get('/aulas', AulasController.findAll);
 app.get('/aulas/destaque', AulasController.featured);
-app.post('/aulas', authMiddleware, requirePermission('aulas.criar'), AulasController.create);
+app.post( '/aulas',  authMiddleware, requirePermission('aulas.criar'),  upload.single('image'),  AulasController.create,);
 app.get('/aulas/:id', AulasController.getById);
-app.put( '/aulas/:id', authMiddleware, requirePermission('aulas.editar_propria'), AulasController.update,);
+app.put( '/aulas/:id', authMiddleware, requirePermission('aulas.editar_propria'), upload.single('image'), AulasController.update,);
 app.delete( '/aulas/:id', authMiddleware, requirePermission('aulas.excluir_propria'), AulasController.remove,);
 app.post('/aulas/:id/avaliacoes', authMiddleware, AvaliacoesController.create);
 app.patch('/aulas/:id/bloquear', authMiddleware, requirePermission('aulas.bloquear'), AulasController.block,);

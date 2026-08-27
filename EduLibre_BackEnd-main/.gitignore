@@ -13,3 +13,4 @@ playwright/.auth/
 coverage/
 test-results/
 playwright-report/
+uploads/

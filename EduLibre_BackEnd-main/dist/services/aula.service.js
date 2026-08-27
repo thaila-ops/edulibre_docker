@@ -20,7 +20,7 @@ class AulaService {
     static async list(filters) {
         const pageRequest = (0, pagination_1.getPageRequest)(filters.page, filters.pageSize);
         const result = await Aula_1.default.findAndCountAll({
-            where: AulaService.buildWhere(filters.materia, filters.professorId),
+            where: AulaService.buildWhere(filters.materia, filters.professorId, filters.status),
             include: AULA_INCLUDE,
             limit: pageRequest.limit,
             offset: pageRequest.offset,
@@ -30,13 +30,32 @@ class AulaService {
         return (0, pagination_1.buildPage)(result.rows.map((item) => AulaService.serialize(item)), result.count, pageRequest.page, pageRequest.pageSize);
     }
     static async featured() {
-        const lessons = await Aula_1.default.findAll({ include: AULA_INCLUDE, limit: 3, order: [['id', 'DESC']] });
+        const lessons = await Aula_1.default.findAll({
+            where: { status: 'ativa' },
+            include: AULA_INCLUDE,
+            limit: 3,
+            order: [['id', 'DESC']],
+        });
         return lessons.map((item) => AulaService.serialize(item));
+    }
+    static async block(id, motivo) {
+        const aula = await Aula_1.default.findByPk(id);
+        if (!aula)
+            throw new http_error_1.default(404, 'Aula não encontrada.');
+        await aula.update({ status: 'bloqueada', motivoBloqueio: (0, validators_1.requireText)(motivo, 'Motivo do bloqueio') });
+        return AulaService.findById(aula.id);
+    }
+    static async unblock(id) {
+        const aula = await Aula_1.default.findByPk(id);
+        if (!aula)
+            throw new http_error_1.default(404, 'Aula não encontrada.');
+        await aula.update({ status: 'ativa', motivoBloqueio: null });
+        return AulaService.findById(aula.id);
     }
     static async findById(id) {
         const aula = await Aula_1.default.findByPk(id, { include: AULA_INCLUDE });
         if (!aula)
-            throw new http_error_1.default(404, 'Aula nÃ£o encontrada.');
+            throw new http_error_1.default(404, 'Aula não encontrada.');
         return AulaService.serialize(aula);
     }
     static async create(payload) {
@@ -48,35 +67,37 @@ class AulaService {
         await AulaService.ensureProfessor(payload.professorId);
         const aula = await Aula_1.default.findByPk(id);
         if (!aula)
-            throw new http_error_1.default(404, 'Aula nÃ£o encontrada.');
+            throw new http_error_1.default(404, 'Aula não encontrada.');
         await aula.update(AulaService.buildPayload(payload));
         return AulaService.findById(aula.id);
     }
     static async remove(id) {
         const aula = await Aula_1.default.findByPk(id);
         if (!aula)
-            throw new http_error_1.default(404, 'Aula nÃ£o encontrada.');
+            throw new http_error_1.default(404, 'Aula não encontrada.');
         await aula.destroy();
     }
     static buildPayload(payload) {
         return {
-            materia: (0, validators_1.requireText)(payload.materia, 'MatÃ©ria'),
+            materia: (0, validators_1.requireText)(payload.materia, 'Matéria'),
             valor: (0, validators_1.validatePositiveNumber)(Number(payload.valor), 'Valor'),
             descricao: payload.descricao?.trim() || null,
             imageUrl: (0, validators_1.validateOptionalUrl)(payload.imageUrl),
             professorId: Number(payload.professorId),
         };
     }
-    static buildWhere(materia, professorId) {
+    static buildWhere(materia, professorId, status) {
         return {
             ...(materia ? { materia: { [sequelize_1.Op.like]: `%${materia.trim()}%` } } : {}),
             ...(professorId ? { professorId: Number(professorId) } : {}),
+            ...(status && status !== 'all' ? { status } : {}),
+            ...(!status ? { status: 'ativa' } : {}),
         };
     }
     static async ensureProfessor(id) {
         const professor = await User_1.default.findByPk(Number(id));
         if (!professor)
-            throw new http_error_1.default(400, 'Utilizador invÃ¡lido.');
+            throw new http_error_1.default(400, 'Utilizador inválido.');
         (0, validators_1.ensureAdult)(professor.dataNascimento, 'vender aulas');
     }
     static serialize(aula) {
@@ -93,6 +114,8 @@ class AulaService {
             valor: plain.valor,
             descricao: plain.descricao,
             imageUrl: plain.imageUrl,
+            status: plain.status,
+            motivoBloqueio: plain.motivoBloqueio,
             professorId: plain.professorId,
             professor: plain.professor,
             reviewCount: reviews.length,

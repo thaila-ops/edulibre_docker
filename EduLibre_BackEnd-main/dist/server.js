@@ -10,6 +10,11 @@ require("./models/User");
 require("./models/Aula");
 require("./models/Agendamento");
 require("./models/Avaliacao");
+require("./models/Role");
+require("./models/Permission");
+require("./models/RolePermission");
+require("./models/UserRoleAssignment");
+const rbac_service_1 = __importDefault(require("./services/rbac.service"));
 const port = Number(process.env.PORT) || 3001;
 async function normalizeLegacyBirthDates() {
     try {
@@ -30,6 +35,8 @@ async function normalizeLegacyBirthDates() {
 async function startServer() {
     await normalizeLegacyBirthDates();
     await database_1.default.sync({ alter: true });
+    await rbac_service_1.default.seed();
+    await rbac_service_1.default.migrateLegacyUsers();
     app_1.default.listen(port, () => console.log(`Servidor EduLivre rodando na porta ${port}`));
 }
 startServer().catch((error) => console.error('Falha ao iniciar servidor:', error.message));

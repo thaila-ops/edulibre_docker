@@ -14,7 +14,7 @@ User.init({
     password: { type: sequelize_1.DataTypes.STRING, allowNull: false },
     cpf: { type: sequelize_1.DataTypes.STRING(11), allowNull: false, unique: true },
     dataNascimento: { type: sequelize_1.DataTypes.DATEONLY, allowNull: true, defaultValue: null },
-    tipo: { type: sequelize_1.DataTypes.ENUM('usuario'), allowNull: false, defaultValue: 'usuario' },
+    tipo: { type: sequelize_1.DataTypes.ENUM('usuario', 'admin'), allowNull: false, defaultValue: 'usuario' },
     avatarUrl: { type: sequelize_1.DataTypes.TEXT, allowNull: true, defaultValue: null },
     bio: { type: sequelize_1.DataTypes.TEXT, allowNull: true, defaultValue: null },
 }, { sequelize: database_1.default, tableName: 'Users' });
