@@ -5,6 +5,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const CPF_REGEX = /^\d{11}$/;
 const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
 const DATA_IMAGE_URL_REGEX = /^data:image\/(?:png|jpeg|jpg|webp);base64,[A-Za-z0-9+/=]+$/i;
+const UPLOAD_IMAGE_PATH_REGEX = /^\/uploads\/[a-zA-Z0-9][a-zA-Z0-9._-]*\.(?:jpg|jpeg|png|webp)$/i;
 
 function cleanValue(value: string) {
   return value.trim();
@@ -88,11 +89,16 @@ export function ensureAdult(date: Date | string | null | undefined, action: stri
 export function validateOptionalUrl(value: string | undefined) {
   if (!value || !value.trim()) return null;
   const normalizedValue = value.trim();
-  if (DATA_IMAGE_URL_REGEX.test(normalizedValue)) return normalizedValue;
+ if (
+  DATA_IMAGE_URL_REGEX.test(normalizedValue)
+  || UPLOAD_IMAGE_PATH_REGEX.test(normalizedValue)
+) {
+  return normalizedValue;
+}
   try {
     return new URL(normalizedValue).toString();
   } catch {
-    throw new HttpError(400, 'URL de imagem invÃ¡lida.');
+    throw new HttpError(400, 'URL de imagem invalida.');
   }
 }
 

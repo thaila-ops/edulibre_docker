@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import AulaService from '../services/aula.service';
+import NotificacaoService from '../services/notificacao.service';
 import asyncHandler from '../utils/async-handler';
 import HttpError from '../utils/http-error';
 
@@ -24,15 +25,33 @@ class AulasController {
     res.status(200).json(aulas);
   });
 
-  public static block = asyncHandler(async (req: Request, res: Response) => {
-    const aula = await AulaService.block(Number(req.params.id), req.body.motivo);
-    res.status(200).json(aula);
+ public static block = asyncHandler(async (req: Request, res: Response) => {
+  const aula = await AulaService.block(
+    Number(req.params.id),
+    req.body.motivo,
+  );
+
+  await NotificacaoService.aulaBloqueada({
+    userId: aula.professorId,
+    aulaId: aula.id,
+    materia: aula.materia,
+    motivo: aula.motivoBloqueio,
   });
 
-  public static unblock = asyncHandler(async (req: Request, res: Response) => {
-    const aula = await AulaService.unblock(Number(req.params.id));
-    res.status(200).json(aula);
+  res.status(200).json(aula);
+});
+
+public static unblock = asyncHandler(async (req: Request, res: Response) => {
+  const aula = await AulaService.unblock(Number(req.params.id));
+
+  await NotificacaoService.aulaDesbloqueada({
+    userId: aula.professorId,
+    aulaId: aula.id,
+    materia: aula.materia,
   });
+
+  res.status(200).json(aula);
+});
 
   public static getById = asyncHandler(async (req: Request, res: Response) => {
     const aula = await AulaService.findById(Number(req.params.id));

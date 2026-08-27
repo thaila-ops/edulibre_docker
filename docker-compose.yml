@@ -38,6 +38,8 @@ services:
       DB_NAME: ${DB_NAME:-edulivre}
       DB_USER: ${DB_USER:-app}
       DB_PASS: ${DB_PASS}
+    volumes:
+      - uploads_data:/app/uploads
     networks:
       - internal_network
     depends_on:
@@ -79,6 +81,7 @@ services:
 volumes:
   mysql_data:
   frontend_build:
+  uploads_data:
 
 networks:
   internal_network:

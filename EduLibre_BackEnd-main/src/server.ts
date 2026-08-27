@@ -5,11 +5,13 @@ import './models/User';
 import './models/Aula';
 import './models/Agendamento';
 import './models/Avaliacao';
+import './models/Notificacao';
 import './models/Role';
 import './models/Permission';
 import './models/RolePermission';
 import './models/UserRoleAssignment';
 import RbacService from './services/rbac.service';
+
 
 const port = Number(process.env.PORT) || 3001;
 

@@ -1,4 +1,4 @@
-const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
+const MAX_IMAGE_SIZE = 5* 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
 
 function isAllowedImageType(file: File) {
@@ -30,6 +30,6 @@ export async function imageFileToDataUrl(file: File) {
   if (!isAllowedImageType(file)) {
     throw new Error(`O sistema aceita apenas imagens ${getAcceptedImageTypesLabel()}.`);
   }
-  if (!isAllowedSize(file)) throw new Error('A imagem deve ter no máximo 2 MB.');
+  if (!isAllowedSize(file)) throw new Error('A imagem deve ter no máximo 5 MB.');
   return readDataUrl(file);
 }
