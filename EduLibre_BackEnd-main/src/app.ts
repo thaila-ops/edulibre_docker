@@ -15,6 +15,7 @@ import HttpError from './utils/http-error';
 import path from 'path';
 import upload from './config/upload';
 import { MulterError } from 'multer';
+import NotificacoesController from './controllers/notificacoes.controller';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -42,8 +43,19 @@ app.get('/usuarios', authMiddleware, requirePermission('usuarios.listar'), Users
 app.get('/usuarios/me', authMiddleware, UsersController.profile);
 app.post('/usuarios/me/tornar-professor', authMiddleware, UsersController.tornarProfessor,);
 app.get('/usuarios/:id', authMiddleware, UsersController.getById);
-app.put('/usuarios/:id', authMiddleware, UsersController.update);
+app.put( '/usuarios/:id', authMiddleware, upload.single('avatar'), UsersController.update,);
 app.delete('/usuarios/:id', authMiddleware, UsersController.remove);
+app.get(
+  '/notificacoes',
+  authMiddleware,
+  NotificacoesController.listarMinhas,
+);
+
+app.patch(
+  '/notificacoes/:id/lida',
+  authMiddleware,
+  NotificacoesController.marcarComoLida,
+);
 app.patch(
   '/usuarios/:id/promover',
   authMiddleware,

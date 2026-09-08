@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
 import logo from '../assets/logo.png';
 import { useAuth } from '../contexts/AuthContext';
+import NotificationBell from './NotificationBell';
 import './Headers.css';
 
 function Header() {
@@ -57,6 +58,17 @@ function Header() {
 
           {token && isAdmin && (
             <Link to="/admin">Painel admin</Link>
+          )}
+          {token && isAdmin && (
+            <Link to="/admin">Painel admin</Link>
+          )}
+
+          {token && <NotificationBell />}
+
+          {token ? (
+            <Link to="/conta">Minha conta</Link>
+          ) : (
+            <Link to="/login">Login</Link>
           )}
 
           {token ? (

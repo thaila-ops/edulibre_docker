@@ -29,6 +29,8 @@ export type Lesson = {
   valor: number;
   descricao: string | null;
   imageUrl: string | null;
+  status?: 'ativa' | 'bloqueada';
+  motivoBloqueio?: string | null;
   professorId: number;
   professor?: User;
   averageRating?: number;
@@ -72,4 +74,15 @@ export type AdminDashboardStats = {
   totalAulas: number;
   aulasAtivas: number;
   aulasBloqueadas: number;
+};
+export type Notification = {
+  id: number;
+  userId: number;
+  aulaId: number | null;
+  tipo: 'aula_bloqueada' | 'aula_desbloqueada';
+  titulo: string;
+  mensagem: string;
+  lida: boolean;
+  createdAt: string;
+  updatedAt: string;
 };

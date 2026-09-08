@@ -5,6 +5,7 @@ import {
   Lesson,
   LoginResponse,
   PaginatedResponse,
+  Notification,
   Review,
   User,
 } from '../types';
@@ -46,10 +47,46 @@ export async function createUser(payload: { name: string; email: string; passwor
   return response.data;
 }
 
-export async function updateUser(id: string, payload: { name: string; cpf: string; dataNascimento: string; password?: string; avatarUrl?: string; bio?: string }) {
-  const response = await api.put<User>(`/usuarios/${id}`, payload);
+type UpdateUserPayload = {
+  name: string;
+  cpf: string;
+  dataNascimento: string;
+  password?: string;
+  avatar?: File | null;
+  avatarUrl?: string;
+  bio?: string;
+};
+
+export async function updateUser(id: string, payload: UpdateUserPayload) {
+  const formData = new FormData();
+
+  formData.append('name', payload.name);
+  formData.append('cpf', payload.cpf);
+  formData.append('dataNascimento', payload.dataNascimento);
+  formData.append('bio', payload.bio ?? '');
+
+  if (payload.password) {
+    formData.append('password', payload.password);
+  }
+
+  if (payload.avatar) {
+    formData.append('avatar', payload.avatar);
+  } else if (payload.avatarUrl) {
+    formData.append('avatarUrl', payload.avatarUrl);
+  }
+
+  const response = await api.put<User>(
+    `/usuarios/${id}`,
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    },
+  );
+
   return response.data;
-}
+} 
 
 export async function deleteUser(id: number) {
   await api.delete(`/usuarios/${id}`);
@@ -174,6 +211,50 @@ export async function createReview(id: number, payload: { aulaId: number; alunoI
 export async function fetchAdminDashboard() {
   const response = await api.get<AdminDashboardStats>(
     '/admin/dashboard',
+  );
+
+  return response.data;
+}
+
+
+export async function fetchNotifications() {
+  const response = await api.get<Notification[]>('/notificacoes');
+  return response.data;
+}
+
+export async function markNotificationAsRead(id: number) {
+  const response = await api.patch<Notification>(
+    `/notificacoes/${id}/lida`,
+  );
+
+  return response.data;
+}
+export async function fetchAdminLessons() {
+  const response = await api.get<PaginatedResponse<Lesson>>(
+    '/admin/aulas',
+    {
+      params: {
+        status: 'all',
+        pageSize: 50,
+      },
+    },
+  );
+
+  return response.data;
+}
+
+export async function blockLesson(id: number, motivo: string) {
+  const response = await api.patch<Lesson>(
+    `/aulas/${id}/bloquear`,
+    { motivo },
+  );
+
+  return response.data;
+}
+
+export async function unblockLesson(id: number) {
+  const response = await api.patch<Lesson>(
+    `/aulas/${id}/desbloquear`,
   );
 
   return response.data;

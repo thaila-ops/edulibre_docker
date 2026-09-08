@@ -28,18 +28,29 @@ class UsersController {
     res.status(201).json(user);
   });
 
-  public static update = asyncHandler(async (req: Request, res: Response) => {
-    const targetUserId = Number(req.params.id);
-    const authUserId = req.authUser?.id;
-    if (!authUserId) throw new HttpError(401, 'Não autenticado.');
-    if (authUserId !== targetUserId) {
-      throw new HttpError(403, 'Você só pode editar o próprio perfil.');
-    }
+public static update = asyncHandler(async (req: Request, res: Response) => {
+  const targetUserId = Number(req.params.id);
+  const authUserId = req.authUser?.id;
 
-    const user = await UserService.update(targetUserId, req.body);
-    res.status(200).json(user);
+  if (!authUserId) {
+    throw new HttpError(401, 'Não autenticado.');
+  }
+
+  if (authUserId !== targetUserId) {
+    throw new HttpError(403, 'Você só pode editar o próprio perfil.');
+  }
+
+  const avatarUrl = req.file
+    ? `/uploads/${req.file.filename}`
+    : req.body.avatarUrl;
+
+  const user = await UserService.update(targetUserId, {
+    ...req.body,
+    avatarUrl,
   });
 
+  res.status(200).json(user);
+});
   public static remove = asyncHandler(async (req: Request, res: Response) => {
     const targetUserId = Number(req.params.id);
     const authUserId = req.authUser?.id;

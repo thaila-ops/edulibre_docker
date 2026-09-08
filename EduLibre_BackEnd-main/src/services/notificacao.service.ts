@@ -1,4 +1,5 @@
 import Notificacao from '../models/Notificacao';
+import HttpError from '../utils/http-error';
 
 type LessonNotificationData = {
   userId: number;
@@ -29,4 +30,30 @@ export default class NotificacaoService {
       mensagem: `Sua aula "${data.materia}" foi desbloqueada e já pode voltar a ser exibida.`,
     });
   }
+  public static async listarDoUsuario(userId: number) {
+  return Notificacao.findAll({
+    where: { userId },
+    order: [['createdAt', 'DESC']],
+  });
+}
+
+public static async marcarComoLida(
+  notificacaoId: number,
+  userId: number,
+) {
+  const notificacao = await Notificacao.findOne({
+    where: {
+      id: notificacaoId,
+      userId,
+    },
+  });
+
+  if (!notificacao) {
+    throw new HttpError(404, 'Notificação não encontrada.');
+  }
+
+  await notificacao.update({ lida: true });
+
+  return notificacao;
+}
 }

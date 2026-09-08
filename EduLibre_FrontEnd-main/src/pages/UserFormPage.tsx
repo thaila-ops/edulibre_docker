@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Feedback from '../components/Feedback';
 import FormField from '../components/FormField';
-import ImageUploadField from '../components/ImageUploadField';
+import LessonImageUploadField from '../components/LessonImageUploadField';
 import PageHeader from '../components/PageHeader';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchMe, updateUser } from '../services/http';
@@ -22,6 +22,7 @@ function UserFormPage() {
     confirmPassword: '',
   });
   const [error, setError] = useState('');
+  const [avatar, setAvatar] = useState<File | null>(null);
 
   useEffect(() => {
     fetchMe().then((currentUser) => {
@@ -58,6 +59,7 @@ function UserFormPage() {
         name: form.name,
         cpf: form.cpf,
         dataNascimento: form.dataNascimento,
+       avatar,
         avatarUrl: form.avatarUrl,
         bio: form.bio,
         password: form.password || undefined,
@@ -78,20 +80,17 @@ function UserFormPage() {
           <FormField label="E-mail" name="email" type="email" value={form.email} onChange={(value) => setField('email', value)} />
           <FormField label="CPF" name="cpf" value={form.cpf} onChange={(value) => setField('cpf', value)} />
           <FormField label="Data de nascimento" name="dataNascimento" type="date" value={form.dataNascimento} onChange={(value) => setField('dataNascimento', value)} />
-          <FormField
-            label="URL da foto (opcional)"
-            name="avatarUrl"
-            value={form.avatarUrl}
-            onChange={(value) => setField('avatarUrl', value)}
-            placeholder="https://exemplo.com/minha-foto.jpg"
-          />
-          <ImageUploadField
-            label="Ou envie uma foto do computador"
-            name="avatarUrl"
-            value={form.avatarUrl}
-            onChange={(value) => setField('avatarUrl', value)}
-            onError={setError}
-          />
+          <LessonImageUploadField
+                label="Foto de perfil"
+                name="avatar"
+                value={avatar}
+                currentImageUrl={form.avatarUrl}
+                onChange={(file) => {
+                  setError('');
+                  setAvatar(file);
+                }}
+                onError={setError}
+/>
           <label className="field field-wide">
             <span>Biografia</span>
             <textarea value={form.bio} onChange={(event) => setField('bio', event.target.value)} />
