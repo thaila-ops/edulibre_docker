@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import { AuthUser } from '../types/auth';
+import { useTheme } from '../contexts/ThemeContext';
 
 type Props = {
   navigation: {
@@ -16,6 +17,7 @@ type Props = {
 
 export default function HomeScreen({ navigation }: Props) {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const { colors } = useTheme();
 
   useEffect(() => {
     async function loadUser() {
@@ -37,38 +39,49 @@ export default function HomeScreen({ navigation }: Props) {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.greeting}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      
+
+      <Text style={[styles.greeting, { color: colors.text }]}>
         Olá, {user?.name ?? 'usuária'}!
       </Text>
 
-      <Text style={styles.subtitle}>
+      <Text style={[styles.subtitle, { color: colors.mutedText }]}>
         O que você deseja fazer hoje?
       </Text>
 
       <Pressable
-  style={styles.primaryButton}
-  onPress={() => navigation.navigate('Lessons')}
->
-        <Text style={styles.primaryButtonText}>Ver aulas</Text>
+        style={[styles.primaryButton, { backgroundColor: colors.primary }]}
+        onPress={() => navigation.navigate('Lessons')}
+      >
+        <Text style={[styles.primaryButtonText, { color: colors.onPrimary }]}>
+          Ver aulas
+        </Text>
       </Pressable>
+
       <Pressable
-        style={styles.primaryButton}
+        style={[styles.primaryButton, { backgroundColor: colors.primary }]}
         onPress={() => navigation.navigate('CreateLesson')}
-        >
-        <Text style={styles.primaryButtonText}>Publicar aula</Text>
-        </Pressable>
+      >
+        <Text style={[styles.primaryButtonText, { color: colors.onPrimary }]}>
+          Publicar aula
+        </Text>
+      </Pressable>
 
       <Pressable
-  style={styles.secondaryButton}
-  onPress={() => navigation.navigate('MyLessons')}
->
-  <Text style={styles.secondaryButtonText}>Minhas aulas</Text>
-</Pressable>
+        style={[styles.secondaryButton, { borderColor: colors.primary }]}
+        onPress={() => navigation.navigate('MyLessons')}
+      >
+        <Text style={[styles.secondaryButtonText, { color: colors.primary }]}>
+          Minhas aulas
+        </Text>
+      </Pressable>
 
-<Pressable style={styles.logoutButton} onPress={handleLogout}>
-  <Text style={styles.logoutButtonText}>Sair</Text>
-</Pressable>
+      <Pressable style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={[styles.logoutButtonText, { color: colors.danger }]}>
+          Sair
+        </Text>
+      </Pressable>
     </View>
   );
 }
@@ -78,27 +91,23 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 24,
-    backgroundColor: '#fcf7ef',
   },
+ 
   greeting: {
-    color: '#0f3557',
     fontSize: 32,
     fontWeight: '800',
   },
   subtitle: {
     marginTop: 10,
     marginBottom: 36,
-    color: '#5e5145',
     fontSize: 17,
   },
   primaryButton: {
     paddingVertical: 16,
     borderRadius: 14,
     marginBottom: 14,
-    backgroundColor: '#bd6338',
   },
   primaryButtonText: {
-    color: '#ffffff',
     fontSize: 17,
     fontWeight: '700',
     textAlign: 'center',
@@ -107,11 +116,9 @@ const styles = StyleSheet.create({
     marginTop: 14,
     paddingVertical: 16,
     borderWidth: 1,
-    borderColor: '#bd6338',
     borderRadius: 14,
   },
   secondaryButtonText: {
-    color: '#bd6338',
     fontSize: 17,
     fontWeight: '700',
     textAlign: 'center',
@@ -121,7 +128,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   logoutButtonText: {
-    color: '#8a4731',
     fontSize: 16,
     fontWeight: '700',
   },

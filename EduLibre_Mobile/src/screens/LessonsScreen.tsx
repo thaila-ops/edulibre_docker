@@ -9,9 +9,11 @@ import {
   Text,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { API_URL } from '../services/api';
 import { fetchLessons } from '../services/lessons';
 import { Lesson } from '../types/lesson';
+import { useTheme } from '../contexts/ThemeContext';
 
 type Props = {
   navigation: {
@@ -22,10 +24,7 @@ type Props = {
 function getImageUrl(imageUrl: string | null) {
   if (!imageUrl) return null;
 
-  if (
-    imageUrl.startsWith('http')
-    || imageUrl.startsWith('data:image')
-  ) {
+  if (imageUrl.startsWith('http') || imageUrl.startsWith('data:image')) {
     return imageUrl;
   }
 
@@ -37,6 +36,7 @@ export default function LessonsScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
+  const { colors } = useTheme();
 
   async function loadLessons(isRefreshing = false) {
     try {
@@ -64,102 +64,138 @@ export default function LessonsScreen({ navigation }: Props) {
 
   if (loading) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#bd6338" />
-        <Text style={styles.loadingText}>Carregando aulas...</Text>
-      </View>
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[styles.loadingText, { color: colors.mutedText }]}>
+            Carregando aulas...
+          </Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Pressable onPress={navigation.goBack}>
-        <Text style={styles.backButton}>← Voltar</Text>
-      </Pressable>
-
-      <Text style={styles.title}>Aulas disponíveis</Text>
-
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-
-      <FlatList
-        data={lessons}
-        keyExtractor={(lesson) => String(lesson.id)}
-        contentContainerStyle={styles.list}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={() => {
-              void loadLessons(true);
-            }}
-          />
-        }
-        ListEmptyComponent={
-          <Text style={styles.empty}>
-            Nenhuma aula disponível no momento.
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <View style={styles.container}>
+        <Pressable onPress={navigation.goBack}>
+          <Text style={[styles.backButton, { color: colors.text }]}>
+            ← Voltar
           </Text>
-        }
-        renderItem={({ item }) => {
-          const imageUrl = getImageUrl(item.imageUrl);
+        </Pressable>
 
-          return (
-            <View style={styles.card}>
-              {imageUrl ? (
-                <Image source={{ uri: imageUrl }} style={styles.image} />
-              ) : (
-                <View style={styles.imagePlaceholder}>
-                  <Text style={styles.imagePlaceholderText}>EduLivre</Text>
-                </View>
-              )}
+        <Text style={[styles.title, { color: colors.text }]}>
+          Aulas disponíveis
+        </Text>
 
-              <Text style={styles.subject}>{item.materia}</Text>
+        {error ? (
+          <Text style={[styles.error, { color: colors.danger }]}>{error}</Text>
+        ) : null}
 
-              <Text style={styles.teacher}>
-                Professor: {item.professor?.name ?? 'Não informado'}
-              </Text>
+        <FlatList
+          data={lessons}
+          keyExtractor={(lesson) => String(lesson.id)}
+          contentContainerStyle={styles.list}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              tintColor={colors.primary}
+              onRefresh={() => {
+                void loadLessons(true);
+              }}
+            />
+          }
+          ListEmptyComponent={
+            <Text style={[styles.empty, { color: colors.mutedText }]}>
+              Nenhuma aula disponível no momento.
+            </Text>
+          }
+          renderItem={({ item }) => {
+            const imageUrl = getImageUrl(item.imageUrl);
 
-              {item.descricao ? (
-                <Text style={styles.description} numberOfLines={2}>
-                  {item.descricao}
+            return (
+              <View
+                style={[
+                  styles.card,
+                  {
+                    backgroundColor: colors.surface,
+                    borderColor: colors.border,
+                  },
+                ]}
+              >
+                {imageUrl ? (
+                  <Image source={{ uri: imageUrl }} style={styles.image} />
+                ) : (
+                  <View
+                    style={[
+                      styles.imagePlaceholder,
+                      { backgroundColor: colors.border },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.imagePlaceholderText,
+                        { color: colors.text },
+                      ]}
+                    >
+                      EduLivre
+                    </Text>
+                  </View>
+                )}
+
+                <Text style={[styles.subject, { color: colors.text }]}>
+                  {item.materia}
                 </Text>
-              ) : null}
 
-              <Text style={styles.price}>
-                R$ {Number(item.valor).toFixed(2).replace('.', ',')}
-              </Text>
-            </View>
-          );
-        }}
-      />
-    </View>
+                <Text style={[styles.teacher, { color: colors.mutedText }]}>
+                  Professor: {item.professor?.name ?? 'Não informado'}
+                </Text>
+
+                {item.descricao ? (
+                  <Text
+                    style={[styles.description, { color: colors.mutedText }]}
+                    numberOfLines={2}
+                  >
+                    {item.descricao}
+                  </Text>
+                ) : null}
+
+                <Text style={[styles.price, { color: colors.primary }]}>
+                  R$ {Number(item.valor).toFixed(2).replace('.', ',')}
+                </Text>
+              </View>
+            );
+          }}
+        />
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 52,
-    backgroundColor: '#fcf7ef',
+    paddingTop: 18,
   },
   centered: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fcf7ef',
   },
   loadingText: {
     marginTop: 12,
-    color: '#5e5145',
   },
   backButton: {
-    color: '#0f3557',
     fontSize: 16,
     fontWeight: '700',
   },
   title: {
     marginTop: 24,
     marginBottom: 18,
-    color: '#0f3557',
     fontSize: 28,
     fontWeight: '800',
   },
@@ -170,9 +206,7 @@ const styles = StyleSheet.create({
   card: {
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#eadfce',
     borderRadius: 16,
-    backgroundColor: '#ffffff',
   },
   image: {
     width: '100%',
@@ -182,44 +216,36 @@ const styles = StyleSheet.create({
     height: 150,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#eadfce',
   },
   imagePlaceholderText: {
-    color: '#0f3557',
     fontSize: 20,
     fontWeight: '800',
   },
   subject: {
     marginTop: 14,
     marginHorizontal: 14,
-    color: '#0f3557',
     fontSize: 20,
     fontWeight: '800',
   },
   teacher: {
     marginTop: 6,
     marginHorizontal: 14,
-    color: '#5e5145',
   },
   description: {
     marginTop: 10,
     marginHorizontal: 14,
-    color: '#5e5145',
     lineHeight: 20,
   },
   price: {
     margin: 14,
-    color: '#bd6338',
     fontSize: 18,
     fontWeight: '800',
   },
   empty: {
     marginTop: 48,
-    color: '#5e5145',
     textAlign: 'center',
   },
   error: {
     marginBottom: 14,
-    color: '#a63122',
   },
 });

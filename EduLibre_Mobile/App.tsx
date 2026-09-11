@@ -8,13 +8,15 @@ import LessonsScreen from './src/screens/LessonsScreen';
 import CreateLessonScreen from './src/screens/CreateLessonScreen';
   import MyLessonsScreen from './src/screens/MyLessonsScreen';
   import EditLessonScreen from './src/screens/EditLessonScreen';
+  import { ThemeProvider } from './src/contexts/ThemeContext';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
+  <ThemeProvider>
     <NavigationContainer>
-      <StatusBar style="dark" />
+      <StatusBar style="auto" />
 
       <Stack.Navigator
         initialRouteName="Welcome"
@@ -30,6 +32,8 @@ export default function App() {
         <Stack.Screen name="MyLessons" component={MyLessonsScreen} />
         <Stack.Screen name="EditLesson" component={EditLessonScreen} />
       </Stack.Navigator>
-    </NavigationContainer>
-  );
+        </NavigationContainer>
+  </ThemeProvider>
+);
+  
 }
