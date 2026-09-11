@@ -52,19 +52,23 @@ export default function HomeScreen({ navigation }: Props) {
 >
         <Text style={styles.primaryButtonText}>Ver aulas</Text>
       </Pressable>
-
-      <Pressable style={styles.secondaryButton}>
-        <Text style={styles.secondaryButtonText}>Minhas aulas</Text>
-      </Pressable>
+      <Pressable
+        style={styles.primaryButton}
+        onPress={() => navigation.navigate('CreateLesson')}
+        >
+        <Text style={styles.primaryButtonText}>Publicar aula</Text>
+        </Pressable>
 
       <Pressable
-        style={styles.logoutButton}
-        onPress={() => {
-          void handleLogout();
-        }}
-      >
-        <Text style={styles.logoutButtonText}>Sair</Text>
-      </Pressable>
+  style={styles.secondaryButton}
+  onPress={() => navigation.navigate('MyLessons')}
+>
+  <Text style={styles.secondaryButtonText}>Minhas aulas</Text>
+</Pressable>
+
+<Pressable style={styles.logoutButton} onPress={handleLogout}>
+  <Text style={styles.logoutButtonText}>Sair</Text>
+</Pressable>
     </View>
   );
 }
@@ -90,6 +94,7 @@ const styles = StyleSheet.create({
   primaryButton: {
     paddingVertical: 16,
     borderRadius: 14,
+    marginBottom: 14,
     backgroundColor: '#bd6338',
   },
   primaryButtonText: {
