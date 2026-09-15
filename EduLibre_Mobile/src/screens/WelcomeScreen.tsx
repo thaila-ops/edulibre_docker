@@ -41,6 +41,15 @@ export default function WelcomeScreen({ navigation }: Props) {
           </Text>
         </Pressable>
 
+        <Pressable
+            style={[styles.secondaryButton, { borderColor: colors.primary }]}
+            onPress={() => navigation.navigate('Register')}
+          >
+            <Text style={[styles.secondaryButtonText, { color: colors.primary }]}>
+              Criar conta
+            </Text>
+          </Pressable>
+
         <Text style={[styles.footer, { color: colors.mutedText }]}>
           Plataforma de aulas particulares.
         </Text>
@@ -94,6 +103,18 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textAlign: 'center',
   },
+  secondaryButton: {
+  width: '100%',
+  marginTop: 14,
+  paddingVertical: 16,
+  borderWidth: 1,
+  borderRadius: 14,
+},
+secondaryButtonText: {
+  fontSize: 17,
+  fontWeight: '700',
+  textAlign: 'center',
+},
   footer: {
     position: 'absolute',
     bottom: 40,

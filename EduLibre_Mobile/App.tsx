@@ -9,6 +9,7 @@ import CreateLessonScreen from './src/screens/CreateLessonScreen';
   import MyLessonsScreen from './src/screens/MyLessonsScreen';
   import EditLessonScreen from './src/screens/EditLessonScreen';
   import { ThemeProvider } from './src/contexts/ThemeContext';
+  import RegisterScreen from './src/screens/RegisterScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -31,6 +32,7 @@ export default function App() {
         <Stack.Screen name="CreateLesson" component={CreateLessonScreen} />
         <Stack.Screen name="MyLessons" component={MyLessonsScreen} />
         <Stack.Screen name="EditLesson" component={EditLessonScreen} />
+        <Stack.Screen name="Register" component={RegisterScreen} />
       </Stack.Navigator>
         </NavigationContainer>
   </ThemeProvider>

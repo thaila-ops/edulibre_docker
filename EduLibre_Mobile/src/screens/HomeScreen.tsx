@@ -18,6 +18,9 @@ type Props = {
 export default function HomeScreen({ navigation }: Props) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const { colors } = useTheme();
+  const canManageLessons =
+  user?.isSuperAdmin === true ||
+  user?.roles?.includes('professor') === true;
 
   useEffect(() => {
     async function loadUser() {
@@ -59,23 +62,27 @@ export default function HomeScreen({ navigation }: Props) {
         </Text>
       </Pressable>
 
-      <Pressable
-        style={[styles.primaryButton, { backgroundColor: colors.primary }]}
-        onPress={() => navigation.navigate('CreateLesson')}
-      >
-        <Text style={[styles.primaryButtonText, { color: colors.onPrimary }]}>
-          Publicar aula
-        </Text>
-      </Pressable>
+     {canManageLessons ? (
+  <>
+    <Pressable
+      style={[styles.primaryButton, { backgroundColor: colors.primary }]}
+      onPress={() => navigation.navigate('CreateLesson')}
+    >
+      <Text style={[styles.primaryButtonText, { color: colors.onPrimary }]}>
+        Publicar aula
+      </Text>
+    </Pressable>
 
-      <Pressable
-        style={[styles.secondaryButton, { borderColor: colors.primary }]}
-        onPress={() => navigation.navigate('MyLessons')}
-      >
-        <Text style={[styles.secondaryButtonText, { color: colors.primary }]}>
-          Minhas aulas
-        </Text>
-      </Pressable>
+    <Pressable
+      style={[styles.secondaryButton, { borderColor: colors.primary }]}
+      onPress={() => navigation.navigate('MyLessons')}
+    >
+      <Text style={[styles.secondaryButtonText, { color: colors.primary }]}>
+        Minhas aulas
+      </Text>
+    </Pressable>
+  </>
+) : null}
 
       <Pressable style={styles.logoutButton} onPress={handleLogout}>
         <Text style={[styles.logoutButtonText, { color: colors.danger }]}>

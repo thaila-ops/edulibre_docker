@@ -12,3 +12,15 @@ export async function loginRequest(
 
   return response.data;
 }
+type RegisterPayload = {
+  name: string;
+  email: string;
+  password: string;
+  cpf: string;
+  dataNascimento: string;
+};
+
+export async function registerRequest(payload: RegisterPayload) {
+  const response = await api.post('/usuarios', payload);
+  return response.data;
+}

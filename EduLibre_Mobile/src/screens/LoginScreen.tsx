@@ -26,7 +26,7 @@ export default function LoginScreen({ navigation }: Props) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { colors } = useTheme();
-
+  const [showPassword, setShowPassword] = useState(false);
   async function handleLogin() {
     if (!email.trim() || !password) {
       setError('Informe e-mail e senha.');
@@ -113,10 +113,18 @@ export default function LoginScreen({ navigation }: Props) {
           ]}
           placeholder="Senha"
           placeholderTextColor={colors.mutedText}
-          secureTextEntry
+          secureTextEntry={!showPassword}
           value={password}
           onChangeText={setPassword}
         />
+        <Pressable
+          style={styles.showPasswordButton}
+          onPress={() => setShowPassword((current) => !current)}
+        >
+          <Text style={[styles.showPasswordText, { color: colors.primary }]}>
+            {showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+          </Text>
+        </Pressable>
 
         {error ? (
           <Text style={[styles.error, { color: colors.danger }]}>{error}</Text>
@@ -173,6 +181,15 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     fontSize: 16,
   },
+  showPasswordButton: {
+  alignSelf: 'flex-end',
+  marginTop: -8,
+  marginBottom: 6,
+},
+showPasswordText: {
+  fontSize: 14,
+  fontWeight: '700',
+},
   error: {
     marginBottom: 14,
     fontSize: 14,
