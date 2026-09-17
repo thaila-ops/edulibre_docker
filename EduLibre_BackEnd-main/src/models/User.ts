@@ -22,7 +22,7 @@ User.init(
     password: { type: DataTypes.STRING, allowNull: false },
     cpf: { type: DataTypes.STRING(11), allowNull: false, unique: true },
     dataNascimento: { type: DataTypes.DATEONLY, allowNull: true, defaultValue: null },
-    tipo: { type: DataTypes.ENUM('usuario'), allowNull: false, defaultValue: 'usuario' },
+    tipo: { type: DataTypes.ENUM('usuario', 'admin'), allowNull: false, defaultValue: 'usuario' },
     avatarUrl: { type: DataTypes.TEXT, allowNull: true, defaultValue: null },
     bio: { type: DataTypes.TEXT, allowNull: true, defaultValue: null },
   },

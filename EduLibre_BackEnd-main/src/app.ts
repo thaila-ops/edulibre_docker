@@ -8,8 +8,14 @@ import AvaliacoesController from './controllers/avaliacoes.controller';
 import AulasController from './controllers/aulas.controller';
 import AgendamentosController from './controllers/agendamentos.controller';
 import UsersController from './controllers/users.controller';
+import AdminController from './controllers/admin.controller';
 import authMiddleware from './middlewares/auth.middleware';
+import { requirePermission } from './middlewares/permission.middleware';
 import HttpError from './utils/http-error';
+import path from 'path';
+import upload from './config/upload';
+import { MulterError } from 'multer';
+import NotificacoesController from './controllers/notificacoes.controller';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -21,6 +27,10 @@ const limiter = rateLimit({
 });
 
 app.use(express.json({ limit: '5mb' }));
+app.use(
+  '/uploads',
+  express.static(path.resolve(process.cwd(), 'uploads')),
+);
 app.use(cors({ origin: ['http://localhost:3000', 'https://edulibre.local'], credentials: false }));
 app.use(limiter);
 
@@ -29,22 +39,64 @@ app.post('/login', AuthController.login);
 app.get('/auth/me', authMiddleware, AuthController.me);
 
 app.post('/usuarios', UsersController.create);
-app.get('/usuarios', authMiddleware, UsersController.findAll);
+app.get('/usuarios', authMiddleware, requirePermission('usuarios.listar'), UsersController.findAll,);
 app.get('/usuarios/me', authMiddleware, UsersController.profile);
+app.post('/usuarios/me/tornar-professor', authMiddleware, UsersController.tornarProfessor,);
 app.get('/usuarios/:id', authMiddleware, UsersController.getById);
-app.put('/usuarios/:id', authMiddleware, UsersController.update);
+app.put( '/usuarios/:id', authMiddleware, upload.single('avatar'), UsersController.update,);
 app.delete('/usuarios/:id', authMiddleware, UsersController.remove);
+app.get(
+  '/notificacoes',
+  authMiddleware,
+  NotificacoesController.listarMinhas,
+);
+
+app.patch(
+  '/notificacoes/:id/lida',
+  authMiddleware,
+  NotificacoesController.marcarComoLida,
+);
+app.patch(
+  '/usuarios/:id/promover',
+  authMiddleware,
+  requirePermission('usuarios.papel.gerenciar'),
+  AdminController.promote,
+);
+
+app.patch(
+  '/usuarios/:id/rebaixar',
+  authMiddleware,
+  requirePermission('usuarios.papel.gerenciar'),
+  AdminController.demote,
+);
+
+app.patch(
+  '/usuarios/:id/papeis',
+  authMiddleware,
+  requirePermission('usuarios.papel.gerenciar'),
+  AdminController.grantRole,
+);
+
+app.delete(
+  '/usuarios/:id/papeis/:role',
+  authMiddleware,
+  requirePermission('usuarios.papel.gerenciar'),
+  AdminController.revokeRole,
+);
 
 app.get('/aulas', AulasController.findAll);
 app.get('/aulas/destaque', AulasController.featured);
-app.post('/aulas', authMiddleware, AulasController.create);
+app.post( '/aulas',  authMiddleware, requirePermission('aulas.criar'),  upload.single('image'),  AulasController.create,);
 app.get('/aulas/:id', AulasController.getById);
-app.put('/aulas/:id', authMiddleware, AulasController.update);
-app.delete('/aulas/:id', authMiddleware, AulasController.remove);
+app.put( '/aulas/:id', authMiddleware, requirePermission('aulas.editar_propria'), upload.single('image'), AulasController.update,);
+app.delete( '/aulas/:id', authMiddleware, requirePermission('aulas.excluir_propria'), AulasController.remove,);
 app.post('/aulas/:id/avaliacoes', authMiddleware, AvaliacoesController.create);
-
+app.patch('/aulas/:id/bloquear', authMiddleware, requirePermission('aulas.bloquear'), AulasController.block,);
+app.patch('/aulas/:id/desbloquear', authMiddleware, requirePermission('aulas.desbloquear'), AulasController.unblock,);
+app.get( '/admin/dashboard', authMiddleware, requirePermission('admin.dashboard.visualizar'), AdminController.dashboard,);
+app.get( '/admin/aulas', authMiddleware, requirePermission('aulas.gerenciar_qualquer'), AulasController.findAllAdmin,);
 app.get('/agendamentos', authMiddleware, AgendamentosController.findAll);
-app.post('/agendamentos', authMiddleware, AgendamentosController.create);
+app.post('/agendamentos', authMiddleware, requirePermission('aulas.contratar'), AgendamentosController.create);
 app.get('/agendamentos/:id', authMiddleware, AgendamentosController.getById);
 app.put('/agendamentos/:id', authMiddleware, AgendamentosController.update);
 app.patch('/agendamentos/:id/aceitar', authMiddleware, AgendamentosController.accept);
@@ -54,6 +106,17 @@ app.delete('/agendamentos/:id', authMiddleware, AgendamentosController.remove);
 
 app.use((error: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('ERRO CAPTURADO:', error.message, error.stack);
+  if (error instanceof MulterError) {
+  if (error.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({
+      message: 'A imagem deve ter no máximo 5 MB.',
+    });
+  }
+
+  return res.status(400).json({
+    message: 'Não foi possível processar o upload da imagem.',
+  });
+}
   if (error instanceof HttpError) {
     return res.status(error.statusCode).json({ message: error.message });
   }

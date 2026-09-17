@@ -5,28 +5,60 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const aula_service_1 = __importDefault(require("../services/aula.service"));
 const async_handler_1 = __importDefault(require("../utils/async-handler"));
+const http_error_1 = __importDefault(require("../utils/http-error"));
 class AulasController {
     static featured = (0, async_handler_1.default)(async (_req, res) => {
         const aulas = await aula_service_1.default.featured();
         res.status(200).json(aulas);
     });
     static findAll = (0, async_handler_1.default)(async (req, res) => {
-        const aulas = await aula_service_1.default.list(req.query);
+        // Rota pública: nunca lista aulas bloqueadas (sem status = AulaService aplica 'ativa').
+        const filters = req.query;
+        const aulas = await aula_service_1.default.list(filters);
         res.status(200).json(aulas);
+    });
+    // Rota de admin (protegida por authMiddleware + adminMiddleware em app.ts):
+    // aceita ?status=all|ativa|bloqueada pra gerenciar qualquer aula.
+    static findAllAdmin = (0, async_handler_1.default)(async (req, res) => {
+        const filters = req.query;
+        const aulas = await aula_service_1.default.list({ ...filters, status: filters.status ?? 'all' });
+        res.status(200).json(aulas);
+    });
+    static block = (0, async_handler_1.default)(async (req, res) => {
+        const aula = await aula_service_1.default.block(Number(req.params.id), req.body.motivo);
+        res.status(200).json(aula);
+    });
+    static unblock = (0, async_handler_1.default)(async (req, res) => {
+        const aula = await aula_service_1.default.unblock(Number(req.params.id));
+        res.status(200).json(aula);
     });
     static getById = (0, async_handler_1.default)(async (req, res) => {
         const aula = await aula_service_1.default.findById(Number(req.params.id));
         res.status(200).json(aula);
     });
     static create = (0, async_handler_1.default)(async (req, res) => {
-        const aula = await aula_service_1.default.create(req.body);
+        const aula = await aula_service_1.default.create({
+            ...req.body,
+            professorId: req.authUser.id,
+        });
         res.status(201).json(aula);
     });
     static update = (0, async_handler_1.default)(async (req, res) => {
-        const aula = await aula_service_1.default.update(Number(req.params.id), req.body);
+        const aulaAtual = await aula_service_1.default.findById(Number(req.params.id));
+        if (aulaAtual.professorId !== req.authUser.id) {
+            throw new http_error_1.default(403, 'Você só pode editar a própria aula.');
+        }
+        const aula = await aula_service_1.default.update(Number(req.params.id), {
+            ...req.body,
+            professorId: req.authUser.id,
+        });
         res.status(200).json(aula);
     });
     static remove = (0, async_handler_1.default)(async (req, res) => {
+        const aulaAtual = await aula_service_1.default.findById(Number(req.params.id));
+        if (aulaAtual.professorId !== req.authUser.id) {
+            throw new http_error_1.default(403, 'Você só pode excluir a própria aula.');
+        }
         await aula_service_1.default.remove(Number(req.params.id));
         res.status(204).send();
     });

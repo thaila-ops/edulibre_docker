@@ -5,6 +5,14 @@ import FormField from '../components/FormField';
 import { createUser } from '../services/http';
 import { getErrorMessage, isAdult, validateBirthDate, validateCpf, validateEmail, validatePassword } from '../utils/validation';
 
+function formatCpf(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+
+  return digits
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+}
 function SignupPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -27,7 +35,7 @@ function SignupPage() {
     const normalizedForm = {
       name: form.name.trim(),
       email: form.email.trim(),
-      cpf: form.cpf.trim(),
+      cpf: form.cpf.replace(/\D/g, ''),
       dataNascimento: form.dataNascimento.trim(),
       password: form.password.trim(),
       confirmPassword: form.confirmPassword.trim(),
@@ -48,7 +56,7 @@ function SignupPage() {
         dataNascimento: normalizedForm.dataNascimento,
         password: normalizedForm.password,
       });
-      navigate('/login');
+    navigate('/login'); 
     } catch (submitError) {
       setError(getErrorMessage(submitError));
     }
@@ -61,7 +69,14 @@ function SignupPage() {
         <h1>Crie sua conta para agendar, vender ou fazer os dois</h1>
         <FormField label="Nome" name="name" value={form.name} onChange={(value) => setField('name', value)} />
         <FormField label="E-mail" name="email" type="email" value={form.email} onChange={(value) => setField('email', value)} />
-        <FormField label="CPF" name="cpf" value={form.cpf} onChange={(value) => setField('cpf', value)} />
+        <FormField
+  label="CPF"
+  name="cpf"
+  type="tel"
+  value={form.cpf}
+  placeholder="000.000.000-00"
+  onChange={(value) => setField('cpf', formatCpf(value))}
+/>
         <FormField label="Data de nascimento" name="dataNascimento" type="date" value={form.dataNascimento} onChange={(value) => setField('dataNascimento', value)} />
         <FormField label="Senha" name="password" type="password" value={form.password} onChange={(value) => setField('password', value)} />
         <FormField label="Confirmar senha" name="confirmPassword" type="password" value={form.confirmPassword} onChange={(value) => setField('confirmPassword', value)} />

@@ -1,5 +1,15 @@
 import api from './api';
-import { Booking, Lesson, LoginResponse, PaginatedResponse, Review, User } from '../types';
+import {
+  AdminDashboardStats,
+  Booking,
+  Lesson,
+  LoginResponse,
+  PaginatedResponse,
+  Notification,
+  Review,
+  User,
+} from '../types';
+
 
 type PaginationParams = {
   page?: number;
@@ -18,6 +28,9 @@ export async function fetchMe() {
   const response = await api.get<User>('/auth/me');
   return response.data;
 }
+export async function becomeProfessor() {
+  await api.post('/usuarios/me/tornar-professor');
+}
 
 export async function fetchUsers(params: PaginationParams) {
   const response = await api.get<PaginatedResponse<User>>('/usuarios', { params });
@@ -34,10 +47,46 @@ export async function createUser(payload: { name: string; email: string; passwor
   return response.data;
 }
 
-export async function updateUser(id: string, payload: { name: string; cpf: string; dataNascimento: string; password?: string; avatarUrl?: string; bio?: string }) {
-  const response = await api.put<User>(`/usuarios/${id}`, payload);
+type UpdateUserPayload = {
+  name: string;
+  cpf: string;
+  dataNascimento: string;
+  password?: string;
+  avatar?: File | null;
+  avatarUrl?: string;
+  bio?: string;
+};
+
+export async function updateUser(id: string, payload: UpdateUserPayload) {
+  const formData = new FormData();
+
+  formData.append('name', payload.name);
+  formData.append('cpf', payload.cpf);
+  formData.append('dataNascimento', payload.dataNascimento);
+  formData.append('bio', payload.bio ?? '');
+
+  if (payload.password) {
+    formData.append('password', payload.password);
+  }
+
+  if (payload.avatar) {
+    formData.append('avatar', payload.avatar);
+  } else if (payload.avatarUrl) {
+    formData.append('avatarUrl', payload.avatarUrl);
+  }
+
+  const response = await api.put<User>(
+    `/usuarios/${id}`,
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    },
+  );
+
   return response.data;
-}
+} 
 
 export async function deleteUser(id: number) {
   await api.delete(`/usuarios/${id}`);
@@ -58,13 +107,56 @@ export async function fetchLesson(id: string) {
   return response.data;
 }
 
-export async function createLesson(payload: { materia: string; valor: number; descricao: string; professorId: number; imageUrl?: string }) {
-  const response = await api.post<Lesson>('/aulas', payload);
+type LessonPayload = {
+  materia: string;
+  valor: number;
+  descricao: string;
+  professorId: number;
+  image?: File | null;
+  imageUrl?: string;
+};
+
+function lessonPayloadToFormData(payload: LessonPayload) {
+  const formData = new FormData();
+
+  formData.append('materia', payload.materia);
+  formData.append('valor', String(payload.valor));
+  formData.append('descricao', payload.descricao);
+  formData.append('professorId', String(payload.professorId));
+
+  if (payload.image) {
+    formData.append('image', payload.image);
+  } else if (payload.imageUrl) {
+    formData.append('imageUrl', payload.imageUrl);
+  }
+
+  return formData;
+}
+export async function createLesson(payload: LessonPayload) {
+  const response = await api.post<Lesson>(
+    '/aulas',
+    lessonPayloadToFormData(payload),
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    },
+  );
+
   return response.data;
 }
 
-export async function updateLesson(id: string, payload: { materia: string; valor: number; descricao: string; professorId: number; imageUrl?: string }) {
-  const response = await api.put<Lesson>(`/aulas/${id}`, payload);
+export async function updateLesson(id: string, payload: LessonPayload) {
+  const response = await api.put<Lesson>(
+    `/aulas/${id}`,
+    lessonPayloadToFormData(payload),
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    },
+  );
+
   return response.data;
 }
 
@@ -113,5 +205,57 @@ export async function deleteBooking(id: number) {
 
 export async function createReview(id: number, payload: { aulaId: number; alunoId: number; nota: number; comentario?: string }) {
   const response = await api.post<Review>(`/aulas/${id}/avaliacoes`, payload);
+  return response.data;
+}
+
+export async function fetchAdminDashboard() {
+  const response = await api.get<AdminDashboardStats>(
+    '/admin/dashboard',
+  );
+
+  return response.data;
+}
+
+
+export async function fetchNotifications() {
+  const response = await api.get<Notification[]>('/notificacoes');
+  return response.data;
+}
+
+export async function markNotificationAsRead(id: number) {
+  const response = await api.patch<Notification>(
+    `/notificacoes/${id}/lida`,
+  );
+
+  return response.data;
+}
+export async function fetchAdminLessons() {
+  const response = await api.get<PaginatedResponse<Lesson>>(
+    '/admin/aulas',
+    {
+      params: {
+        status: 'all',
+        pageSize: 50,
+      },
+    },
+  );
+
+  return response.data;
+}
+
+export async function blockLesson(id: number, motivo: string) {
+  const response = await api.patch<Lesson>(
+    `/aulas/${id}/bloquear`,
+    { motivo },
+  );
+
+  return response.data;
+}
+
+export async function unblockLesson(id: number) {
+  const response = await api.patch<Lesson>(
+    `/aulas/${id}/desbloquear`,
+  );
+
   return response.data;
 }

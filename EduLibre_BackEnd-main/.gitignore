@@ -1,8 +1,16 @@
-.env
+.env.*
+!.env.example
 dist/
-Edulibre_BackEnd-main/covarage
+Edulibre_BackEnd-main/coverage
 
 Edulibre_BackEnd-main/node_modules
-Edulibre_BackEnd-main/.env_example
+
 Edulibre_BackEnd-main/.env
 
+estado-auth.json
+playwright/.auth/
+
+coverage/
+test-results/
+playwright-report/
+uploads/

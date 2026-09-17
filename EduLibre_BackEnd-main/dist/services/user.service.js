@@ -47,7 +47,7 @@ class UserService {
         const userWithCpf = await User_1.default.findOne({ where: { cpf } });
         if (userWithCpf && userWithCpf.id !== id)
             throw new http_error_1.default(409, 'Já existe utilizador com este CPF.');
-        await user.update(await UserService.buildUpdatePayload(payload));
+        await user.update(await UserService.buildUpdatePayload(payload, user.tipo));
         return UserService.toAuthUser(user);
     }
     static async remove(id) {
@@ -55,6 +55,13 @@ class UserService {
         if (!user)
             throw new http_error_1.default(404, 'Usuário não encontrado.');
         await user.destroy();
+    }
+    static async setRole(id, tipo) {
+        const user = await User_1.default.findByPk(id);
+        if (!user)
+            throw new http_error_1.default(404, 'Usuário não encontrado.');
+        await user.update({ tipo });
+        return UserService.toAuthUser(user);
     }
     static async authenticate(emailValue, passwordValue) {
         const email = (0, validators_1.validateEmail)((0, validators_1.requireText)(emailValue, 'E-mail'));
@@ -75,19 +82,19 @@ class UserService {
             email: (0, validators_1.validateEmail)((0, validators_1.requireText)(payload.email, 'E-mail')),
             cpf: (0, validators_1.validateCpf)((0, validators_1.requireText)(payload.cpf, 'CPF')),
             dataNascimento,
-            tipo: (0, validators_1.validateRole)(payload.tipo),
+            tipo: 'usuario',
             avatarUrl: (0, validators_1.validateOptionalUrl)(payload.avatarUrl),
             bio: payload.bio?.trim() || null,
             password: await bcrypt_1.default.hash(password, 10),
         };
     }
-    static async buildUpdatePayload(payload) {
+    static async buildUpdatePayload(payload, currentTipo) {
         const dataNascimento = (0, validators_1.validateBirthDate)(payload.dataNascimento);
         const updateData = {
             name: (0, validators_1.requireText)(payload.name, 'Nome'),
             cpf: (0, validators_1.validateCpf)((0, validators_1.requireText)(payload.cpf, 'CPF')),
             dataNascimento,
-            tipo: (0, validators_1.validateRole)(payload.tipo),
+            tipo: currentTipo,
             avatarUrl: (0, validators_1.validateOptionalUrl)(payload.avatarUrl),
             bio: payload.bio?.trim() || null,
             password: undefined,

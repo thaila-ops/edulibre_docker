@@ -1,5 +1,9 @@
 import { ChangeEvent, useEffect, useId, useState } from 'react';
-import { getAcceptedImageTypesAttribute, getAcceptedImageTypesLabel, imageFileToDataUrl } from '../utils/imageUpload';
+import {
+  getAcceptedImageTypesAttribute,
+  getAcceptedImageTypesLabel,
+  imageFileToDataUrl,
+} from '../utils/imageUpload';
 
 type Props = {
   label: string;
@@ -16,6 +20,7 @@ async function handleFile(
   setSelectedFileName: (value: string) => void,
 ) {
   const file = event.target.files?.[0];
+
   if (!file) return;
 
   try {
@@ -24,7 +29,11 @@ async function handleFile(
     setSelectedFileName(file.name);
   } catch (error) {
     setSelectedFileName('');
-    onError(error instanceof Error ? error.message : 'Não foi possível carregar a imagem.');
+    onError(
+      error instanceof Error
+        ? error.message
+        : 'Não foi possível carregar a imagem.',
+    );
   } finally {
     event.target.value = '';
   }
@@ -39,6 +48,7 @@ function ImageUploadField({ label, name, value, onChange, onError }: Props) {
       setSelectedFileName('');
       return;
     }
+
     if (!selectedFileName) {
       setSelectedFileName('Imagem carregada');
     }
@@ -47,6 +57,7 @@ function ImageUploadField({ label, name, value, onChange, onError }: Props) {
   return (
     <label className="field field-wide">
       <span>{label}</span>
+
       <input
         id={inputId}
         aria-label={label}
@@ -57,15 +68,26 @@ function ImageUploadField({ label, name, value, onChange, onError }: Props) {
           void handleFile(event, onChange, onError, setSelectedFileName);
         }}
       />
+
       <p className="muted upload-help">
-        Formatos aceitos: {getAcceptedImageTypesLabel()}. GIF não é suportado. Tamanho máximo: 2 MB.
+        Formatos aceitos: {getAcceptedImageTypesLabel()}. GIF não é suportado.
+        Tamanho máximo: 5 MB.
       </p>
+
       <p className="muted upload-help">
         Arquivo selecionado: {selectedFileName || 'Selecione uma imagem'}
       </p>
+
       <div className="image-upload-preview">
-        {value ? <img src={value} alt={label} className="image-upload-thumb" /> : <div className="image-upload-empty">Nenhuma imagem selecionada.</div>}
+        {value ? (
+          <img src={value} alt={label} className="image-upload-thumb" />
+        ) : (
+          <div className="image-upload-empty">
+            Nenhuma imagem selecionada.
+          </div>
+        )}
       </div>
+
       {value ? (
         <button
           className="secondary-button image-upload-clear"

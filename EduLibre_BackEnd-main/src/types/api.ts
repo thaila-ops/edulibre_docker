@@ -1,4 +1,4 @@
-export type UserRole = 'usuario';
+export type UserRole = 'usuario' | 'admin';
 
 export type AuthUser = {
   id: number;
@@ -24,5 +24,4 @@ export type PaginationResult<T> = {
 export type JwtPayloadData = {
   id: number;
   email: string;
-  tipo: UserRole;
 };

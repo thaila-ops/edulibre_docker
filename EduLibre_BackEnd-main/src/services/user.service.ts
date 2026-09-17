@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import User from '../models/User';
-import { AuthUser } from '../types/api';
+import { AuthUser, UserRole } from '../types/api';
 import { buildPage, getPageRequest } from '../utils/pagination';
 import HttpError from '../utils/http-error';
 import {
@@ -10,7 +10,6 @@ import {
   validateEmail,
   validateOptionalUrl,
   validatePassword,
-  validateRole,
 } from '../utils/validators';
 
 type UserInput = {
@@ -81,7 +80,7 @@ export default class UserService {
     const userWithCpf = await User.findOne({ where: { cpf } });
     if (userWithCpf && userWithCpf.id !== id) throw new HttpError(409, 'Já existe utilizador com este CPF.');
 
-    await user.update(await UserService.buildUpdatePayload(payload));
+    await user.update(await UserService.buildUpdatePayload(payload, user.tipo));
     return UserService.toAuthUser(user);
   }
 
@@ -89,6 +88,13 @@ export default class UserService {
     const user = await User.findByPk(id);
     if (!user) throw new HttpError(404, 'Usuário não encontrado.');
     await user.destroy();
+  }
+
+  public static async setRole(id: number, tipo: 'usuario' | 'admin') {
+    const user = await User.findByPk(id);
+    if (!user) throw new HttpError(404, 'Usuário não encontrado.');
+    await user.update({ tipo });
+    return UserService.toAuthUser(user);
   }
 
   public static async authenticate(emailValue: string, passwordValue: string) {
@@ -109,20 +115,20 @@ export default class UserService {
       email: validateEmail(requireText(payload.email, 'E-mail')),
       cpf: validateCpf(requireText(payload.cpf, 'CPF')),
       dataNascimento,
-      tipo: validateRole(payload.tipo),
+      tipo: 'usuario' as const,
       avatarUrl: validateOptionalUrl(payload.avatarUrl),
       bio: payload.bio?.trim() || null,
       password: await bcrypt.hash(password, 10),
     };
   }
 
-  private static async buildUpdatePayload(payload: UserUpdate) {
+  private static async buildUpdatePayload(payload: UserUpdate, currentTipo: UserRole) {
     const dataNascimento = validateBirthDate(payload.dataNascimento);
     const updateData = {
       name: requireText(payload.name, 'Nome'),
       cpf: validateCpf(requireText(payload.cpf, 'CPF')),
       dataNascimento,
-      tipo: validateRole(payload.tipo),
+      tipo: currentTipo,
       avatarUrl: validateOptionalUrl(payload.avatarUrl),
       bio: payload.bio?.trim() || null,
       password: undefined as string | undefined,

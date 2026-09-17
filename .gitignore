@@ -1,0 +1,27 @@
+# Arquivos de ambiente
+.env
+.env.*
+!.env.example
+
+# Dependências
+node_modules/
+
+# Logs
+*.log
+
+# Docker
+docker-data/
+
+# Testes
+coverage/
+test-results/
+playwright-report/
+blob-report/
+
+# IDEs
+.vscode/
+.idea/
+
+# Sistema
+.DS_Store
+Thumbs.db
