@@ -3,6 +3,7 @@ import UserService from '../services/user.service';
 import asyncHandler from '../utils/async-handler';
 import HttpError from '../utils/http-error';
 import RbacService from '../services/rbac.service';
+import EmailService from '../services/email.service';
 
 class UsersController {
   public static findAll = asyncHandler(async (req: Request, res: Response) => {
@@ -20,13 +21,26 @@ class UsersController {
     res.status(200).json(user);
   });
 
-  public static create = asyncHandler(async (req: Request, res: Response) => {
-    const user = await UserService.create(req.body);
+ public static create = asyncHandler(async (req: Request, res: Response) => {
+  const user = await UserService.create(req.body);
 
-    await RbacService.grantRole(user.id, 'aluno');
+  await RbacService.grantRole(user.id, 'aluno');
 
-    res.status(201).json(user);
-  });
+  try {
+    await EmailService.sendWelcomeEmail({
+      name: user.name,
+      email: user.email,
+    });
+  } catch (error) {
+    console.error('Falha ao enviar e-mail de boas-vindas:', error);
+  }
+
+  res.status(201).json(user);
+});
+
+
+
+
 
 public static update = asyncHandler(async (req: Request, res: Response) => {
   const targetUserId = Number(req.params.id);
