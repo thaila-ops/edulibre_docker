@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { fetchFeaturedLessons } from '../services/http';
 import { Lesson } from '../types';
 import './home.css';
+import professorAluna from '../assets/AlunaProfessor.png';
 
 function HomePage() {
   const [featuredLessons, setFeaturedLessons] = useState<Lesson[]>([]);
@@ -12,80 +13,115 @@ function HomePage() {
   }, []);
 
   return (
+
     <main className="home">
-     <section className="hero">
-  <div className="hero_container">
+  <section className="hero">
+    <div className="hero_container">
+      <div className="hero_left">
+  <div className="hero_eyebrow">
+    Aprender hoje. Construir amanhã.
+  </div>
 
-    <div className="hero_left">
-      <h1>
-        Aprenda com quem <br />
-        <span>entende você</span>
-      </h1>
+  <h1>
+    Aprenda com quem
+    <br />
+    <span>entende você.</span>
+  </h1>
 
-      <p>
-        Encontre professores qualificados, veja aulas em destaque e evolua no seu ritmo com uma experiência simples e elegante.
-      </p>
+  <p>
+    Encontre professores qualificados e descubra novas possibilidades.
+    Na EduLivre, você aprende no seu ritmo e segue em direção aos
+    seus objetivos.
+  </p>
 
-      <div className="search_box">
-        <Link to="/professores">
-          <input readOnly value="O que você quer aprender?" />
-        </Link>
-        <Link to="/professores">
-          <button>Buscar</button>
-        </Link>
+  <div className="hero_actions">
+    <Link to="/professores" className="hero_cta">
+      Explorar aulas
+      <span aria-hidden="true">→</span>
+    </Link>
+
+    <a href="#beneficios" className="hero_secondary">
+      Conheça a EduLivre
+    </a>
+  </div>
+
+  <div className="hero_highlights">
+    <span>Professores verificados</span>
+    <span>Aprendizado no seu ritmo</span>
+    <span>Avaliações reais</span>
+  </div>
+</div>
+      
+      <div className="hero_visual">
+        <img
+          src={professorAluna}
+          alt="Professor auxiliando aluna durante o estudo"
+        />
       </div>
     </div>
+  </section>
 
-  
 
+<section className="benefits">
+  <div className="benefit_card benefit_card--tecnologia">
+    <h3>Professores verificados</h3>
+    <p>
+      Perfis reais com imagem, biografia e aulas publicadas na plataforma.
+    </p>
+  </div>
+
+  <div className="benefit_card benefit_card--idiomas">
+    <h3>Agendamento fácil</h3>
+    <p>
+      Marque suas aulas em poucos segundos e acompanhe o status do pagamento.
+    </p>
+  </div>
+
+  <div className="benefit_card benefit_card--humanidades">
+    <h3>Avaliações reais</h3>
+    <p>
+      Veja a nota média de cada aula antes de decidir com quem estudar.
+    </p>
   </div>
 </section>
-
-      <section className="benefits">
-        <div className="benefit_card">
-          <h3>Professores verificados</h3>
-          <p>Perfis reais com imagem, biografia e aulas publicadas na plataforma.</p>
-        </div>
-        <div className="benefit_card">
-          <h3>Agendamento fácil</h3>
-          <p>Marque suas aulas em poucos segundos e acompanhe o status do pagamento.</p>
-        </div>
-        <div className="benefit_card">
-          <h3>Avaliações reais</h3>
-          <p>Veja a nota média de cada aula antes de decidir com quem estudar.</p>
-        </div>
-      </section>
-      <section className="about">
+<section className="about">
   <div className="about_container">
-
-    <div className="about_image"></div>
+    <div className="about_image" aria-hidden="true" />
 
     <div className="about_text">
-      <h2>Sobre a plataforma</h2>
+      <span className="about_eyebrow">Conheça a EduLivre</span>
+
+      <h2>
+        Seu próximo passo
+        <br />
+        <span>começa aqui.</span>
+      </h2>
 
       <p>
-        Nossa plataforma conecta alunos e professores de forma simples, elegante e eficiente. 
-        Aqui você encontra profissionais qualificados, agenda aulas com facilidade e acompanha toda sua evolução.
+        Conectamos alunos e professores para transformar curiosidade
+        em conhecimento. Encontre profissionais qualificados e
+        descubra aulas que combinam com seus objetivos.
       </p>
 
       <p>
-        Criamos um ambiente acolhedor, pensado para quem valoriza aprendizado com qualidade e autonomia.
+        Um ambiente acolhedor para aprender com autonomia, explorar
+        novas possibilidades e evoluir no seu ritmo.
       </p>
 
-      <Link to="/professores">
-        <button>Conheça os professores</button>
+      <Link to="/professores" className="about_cta">
+        Conheça os professores
+        <span aria-hidden="true">→</span>
       </Link>
     </div>
-
   </div>
 </section>
-
+<div className="home_bottom">
       <section className="teachers">
         <h2>Professores em destaque</h2>
 
         <div className="teachers_grid">
           {featuredLessons.map((lesson) => (
-            <div className="teacher_card" key={lesson.id}>
+            <div className="featured_card" key={lesson.id}>
               {lesson.professor?.avatarUrl ? (
                 <img className="teacher_img teacher_photo" src={lesson.professor.avatarUrl} alt={lesson.professor.name} />
               ) : (
@@ -94,7 +130,9 @@ function HomePage() {
               <h4>{lesson.professor?.name ?? 'Professor'}</h4>
               <span>{lesson.materia}</span>
               <p className="muted">Nota {lesson.averageRating ?? 0} · {lesson.reviewCount ?? 0} avaliações</p>
-              <Link to={`/aula/${lesson.id}`}><button>Agendar aula</button></Link>
+            <Link to={`/aula/${lesson.id}`} className="teacher_button">
+  Agendar aula
+</Link>
             </div>
           ))}
         </div>
@@ -104,13 +142,15 @@ function HomePage() {
         <h2>Aulas em destaque</h2>
         <div className="teachers_grid">
           {featuredLessons.map((lesson) => (
-            <div className="teacher_card" key={`lesson-${lesson.id}`}>
+            <div className="featured_card" key={`lesson-${lesson.id}`}>
               {lesson.imageUrl ? <img className="teacher_img teacher_photo" src={lesson.imageUrl} alt={lesson.materia} /> : <div className="teacher_img"></div>}
               <h4>{lesson.materia}</h4>
               <span>R$ {lesson.valor}</span>
               <p className="muted">{lesson.professor?.name}</p>
-              <Link to={`/aula/${lesson.id}`}><button>Ver detalhes</button></Link>
-            </div>
+              <Link to={`/aula/${lesson.id}`} className="teacher_button">
+  Ver detalhes
+</Link>
+               </div>
           ))}
         </div>
       </section>
@@ -136,8 +176,11 @@ function HomePage() {
 
       <section className="cta">
         <h2>Comece a aprender hoje mesmo</h2>
-        <Link to="/professores"><button>Encontrar professor</button></Link>
-      </section>
+        <Link to="/professores" className="cta_button">
+  Encontrar professor
+</Link>
+          </section>
+          </div>
     </main>
   );
 }

@@ -10,6 +10,7 @@ require("./models/User");
 require("./models/Aula");
 require("./models/Agendamento");
 require("./models/Avaliacao");
+require("./models/Notificacao");
 require("./models/Role");
 require("./models/Permission");
 require("./models/RolePermission");

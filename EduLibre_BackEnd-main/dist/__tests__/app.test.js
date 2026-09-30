@@ -7,13 +7,21 @@ const supertest_1 = __importDefault(require("supertest"));
 const app_1 = __importDefault(require("../app"));
 const user_service_1 = __importDefault(require("../services/user.service"));
 const token_service_1 = __importDefault(require("../services/token.service"));
+const rbac_service_1 = __importDefault(require("../services/rbac.service"));
 jest.mock('../services/user.service');
 jest.mock('../services/token.service');
+jest.mock('../services/rbac.service');
 const mockedUserService = jest.mocked(user_service_1.default);
 const mockedTokenService = jest.mocked(token_service_1.default);
+const mockedRbacService = jest.mocked(rbac_service_1.default);
 describe('App routes', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        mockedRbacService.getAuthContext.mockResolvedValue({
+            roles: ['aluno'],
+            isSuperAdmin: false,
+            permissions: ['aulas.contratar'],
+        });
     });
     test('GET / returns api health', async () => {
         const response = await (0, supertest_1.default)(app_1.default).get('/');
@@ -39,6 +47,7 @@ describe('App routes', () => {
         expect(response.statusCode).toBe(200);
         expect(response.body.token).toBe('token-jwt');
         expect(response.body.user.email).toBe('ana@teste.com');
+        expect(response.body.user.roles).toEqual(['aluno']);
     });
     test('GET /usuarios requires authentication', async () => {
         const response = await (0, supertest_1.default)(app_1.default).get('/usuarios');

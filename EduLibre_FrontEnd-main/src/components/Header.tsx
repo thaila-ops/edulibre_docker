@@ -56,27 +56,21 @@ function Header() {
             </>
           )}
 
-          {token && isAdmin && (
-            <Link to="/admin">Painel admin</Link>
-          )}
-          {token && isAdmin && (
+                  {token && isAdmin && (
             <Link to="/admin">Painel admin</Link>
           )}
 
           {token && <NotificationBell />}
 
-          {token ? (
-            <Link to="/conta">Minha conta</Link>
-          ) : (
-            <Link to="/login">Login</Link>
-          )}
-
-          {token ? (
-            <Link to="/conta">Minha conta</Link>
-          ) : (
-            <Link to="/login">Login</Link>
-          )}
-
+        {token ? (
+  <Link className="header_account" to="/conta">
+    Minha conta
+  </Link>
+) : (
+  <Link className="header_login" to="/login">
+    Entrar
+  </Link>
+)}
           {token && (
             <button className="header_logout" onClick={logout}>
               Sair

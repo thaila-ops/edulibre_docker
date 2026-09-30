@@ -112,9 +112,29 @@ async function handleBecomeProfessor() {
               {lesson.imageUrl ? <img className="teacher_img teacher_photo" src={lesson.imageUrl} alt={lesson.materia} /> : <div className="teacher_img"></div>}
               <h4>{lesson.materia}</h4>
               <span>{lesson.bookingCount ?? 0} agendamentos · {lesson.paidBookingCount ?? 0} pagos</span>
-              <Link to={`/minhas-aulas/${lesson.id}/editar`}><button>Editar aula</button></Link>
-              <Link to={`/minhas-aulas/${lesson.id}/alunos`}><button>Ver alunos</button></Link>
-              <button onClick={() => void handleDeleteLesson(lesson.id)}>Deletar aula</button>
+           <div className="conta-aula-acoes">
+  <Link
+    className="conta-acao"
+    to={`/minhas-aulas/${lesson.id}/editar`}
+  >
+    Editar aula
+  </Link>
+
+  <Link
+    className="conta-acao"
+    to={`/minhas-aulas/${lesson.id}/alunos`}
+  >
+    Ver alunos
+  </Link>
+
+  <button
+    className="conta-acao conta-acao--excluir"
+    type="button"
+    onClick={() => void handleDeleteLesson(lesson.id)}
+  >
+    Excluir aula
+  </button>
+</div>
             </div>
           ))}
         </div>

@@ -17,6 +17,10 @@ const admin_controller_1 = __importDefault(require("./controllers/admin.controll
 const auth_middleware_1 = __importDefault(require("./middlewares/auth.middleware"));
 const permission_middleware_1 = require("./middlewares/permission.middleware");
 const http_error_1 = __importDefault(require("./utils/http-error"));
+const path_1 = __importDefault(require("path"));
+const upload_1 = __importDefault(require("./config/upload"));
+const multer_1 = require("multer");
+const notificacoes_controller_1 = __importDefault(require("./controllers/notificacoes.controller"));
 const app = (0, express_1.default)();
 app.set('trust proxy', 1);
 const limiter = (0, express_rate_limit_1.default)({
@@ -26,6 +30,7 @@ const limiter = (0, express_rate_limit_1.default)({
     legacyHeaders: false,
 });
 app.use(express_1.default.json({ limit: '5mb' }));
+app.use('/uploads', express_1.default.static(path_1.default.resolve(process.cwd(), 'uploads')));
 app.use((0, cors_1.default)({ origin: ['http://localhost:3000', 'https://edulibre.local'], credentials: false }));
 app.use(limiter);
 app.get('/', auth_controller_1.default.health);
@@ -36,17 +41,19 @@ app.get('/usuarios', auth_middleware_1.default, (0, permission_middleware_1.requ
 app.get('/usuarios/me', auth_middleware_1.default, users_controller_1.default.profile);
 app.post('/usuarios/me/tornar-professor', auth_middleware_1.default, users_controller_1.default.tornarProfessor);
 app.get('/usuarios/:id', auth_middleware_1.default, users_controller_1.default.getById);
-app.put('/usuarios/:id', auth_middleware_1.default, users_controller_1.default.update);
+app.put('/usuarios/:id', auth_middleware_1.default, upload_1.default.single('avatar'), users_controller_1.default.update);
 app.delete('/usuarios/:id', auth_middleware_1.default, users_controller_1.default.remove);
+app.get('/notificacoes', auth_middleware_1.default, notificacoes_controller_1.default.listarMinhas);
+app.patch('/notificacoes/:id/lida', auth_middleware_1.default, notificacoes_controller_1.default.marcarComoLida);
 app.patch('/usuarios/:id/promover', auth_middleware_1.default, (0, permission_middleware_1.requirePermission)('usuarios.papel.gerenciar'), admin_controller_1.default.promote);
 app.patch('/usuarios/:id/rebaixar', auth_middleware_1.default, (0, permission_middleware_1.requirePermission)('usuarios.papel.gerenciar'), admin_controller_1.default.demote);
 app.patch('/usuarios/:id/papeis', auth_middleware_1.default, (0, permission_middleware_1.requirePermission)('usuarios.papel.gerenciar'), admin_controller_1.default.grantRole);
 app.delete('/usuarios/:id/papeis/:role', auth_middleware_1.default, (0, permission_middleware_1.requirePermission)('usuarios.papel.gerenciar'), admin_controller_1.default.revokeRole);
 app.get('/aulas', aulas_controller_1.default.findAll);
 app.get('/aulas/destaque', aulas_controller_1.default.featured);
-app.post('/aulas', auth_middleware_1.default, (0, permission_middleware_1.requirePermission)('aulas.criar'), aulas_controller_1.default.create);
+app.post('/aulas', auth_middleware_1.default, (0, permission_middleware_1.requirePermission)('aulas.criar'), upload_1.default.single('image'), aulas_controller_1.default.create);
 app.get('/aulas/:id', aulas_controller_1.default.getById);
-app.put('/aulas/:id', auth_middleware_1.default, (0, permission_middleware_1.requirePermission)('aulas.editar_propria'), aulas_controller_1.default.update);
+app.put('/aulas/:id', auth_middleware_1.default, (0, permission_middleware_1.requirePermission)('aulas.editar_propria'), upload_1.default.single('image'), aulas_controller_1.default.update);
 app.delete('/aulas/:id', auth_middleware_1.default, (0, permission_middleware_1.requirePermission)('aulas.excluir_propria'), aulas_controller_1.default.remove);
 app.post('/aulas/:id/avaliacoes', auth_middleware_1.default, avaliacoes_controller_1.default.create);
 app.patch('/aulas/:id/bloquear', auth_middleware_1.default, (0, permission_middleware_1.requirePermission)('aulas.bloquear'), aulas_controller_1.default.block);
@@ -63,6 +70,16 @@ app.patch('/agendamentos/:id/pagar', auth_middleware_1.default, agendamentos_con
 app.delete('/agendamentos/:id', auth_middleware_1.default, agendamentos_controller_1.default.remove);
 app.use((error, _req, res, _next) => {
     console.error('ERRO CAPTURADO:', error.message, error.stack);
+    if (error instanceof multer_1.MulterError) {
+        if (error.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).json({
+                message: 'A imagem deve ter no máximo 5 MB.',
+            });
+        }
+        return res.status(400).json({
+            message: 'Não foi possível processar o upload da imagem.',
+        });
+    }
     if (error instanceof http_error_1.default) {
         return res.status(error.statusCode).json({ message: error.message });
     }

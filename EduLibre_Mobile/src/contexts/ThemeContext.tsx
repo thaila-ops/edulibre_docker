@@ -10,24 +10,25 @@ type ThemeName = 'light' | 'dark';
 
 const palettes = {
   light: {
-    background: '#fffaf4',
+    background: '#eef4fc',
     surface: '#ffffff',
-    text: '#1f2a44',
-    mutedText: '#5f6572',
-    border: '#dbcdbd',
-    primary: '#b75c29',
+    text: '#152c4c',
+    mutedText: '#52657d',
+    border: '#c4d6ed',
+    primary: '#2563eb',
     danger: '#b42318',
     onPrimary: '#ffffff',
   },
+
   dark: {
-    background: '#121417',
-    surface: '#1d2127',
-    text: '#f5ede5',
-    mutedText: '#c0c5ce',
-    border: '#3b414b',
-    primary: '#e79a67',
+    background: '#0a152a',
+    surface: '#14243e',
+    text: '#edf2fa',
+    mutedText: '#b5c6dc',
+    border: '#3b587c',
+    primary: '#4672ff',
     danger: '#ffb4ab',
-    onPrimary: '#121417',
+    onPrimary: '#ffffff',
   },
 };
 

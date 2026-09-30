@@ -38,8 +38,7 @@ function MarketplacePage() {
       </div>
 
       {error ? <Feedback message={error} /> : null}
-
-      <section className="grid-3">
+      <section className="grid-3 professores-grid">
         {items.map((lesson) => (
           <article className="info-card" key={lesson.id}>
             {lesson.imageUrl ? <img className="teacher_img teacher_photo" src={lesson.imageUrl} alt={lesson.materia} /> : <div className="teacher_img"></div>}
@@ -55,6 +54,7 @@ function MarketplacePage() {
           </article>
         ))}
       </section>
+      
 
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </main>

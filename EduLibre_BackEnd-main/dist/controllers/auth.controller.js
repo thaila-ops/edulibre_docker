@@ -6,18 +6,36 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const async_handler_1 = __importDefault(require("../utils/async-handler"));
 const user_service_1 = __importDefault(require("../services/user.service"));
 const token_service_1 = __importDefault(require("../services/token.service"));
+const rbac_service_1 = __importDefault(require("../services/rbac.service"));
 class AuthController {
     static health = (_req, res) => {
-        res.status(200).json({ message: 'EduLivre API' });
+        res.status(200).json({
+            message: 'EduLivre API',
+        });
     };
     static login = (0, async_handler_1.default)(async (req, res) => {
         const user = await user_service_1.default.authenticate(req.body.email, req.body.password);
-        const token = token_service_1.default.sign({ id: user.id, email: user.email, });
-        res.status(200).json({ message: 'Usuário autenticado.', token, user });
+        const rbac = await rbac_service_1.default.getAuthContext(user.id);
+        const token = token_service_1.default.sign({
+            id: user.id,
+            email: user.email,
+        });
+        res.status(200).json({
+            message: 'Usuário autenticado.',
+            token,
+            user: {
+                ...user,
+                ...rbac,
+            },
+        });
     });
     static me = (0, async_handler_1.default)(async (req, res) => {
         const user = await user_service_1.default.findById(req.authUser.id);
-        res.status(200).json(user);
+        const rbac = await rbac_service_1.default.getAuthContext(user.id);
+        res.status(200).json({
+            ...user,
+            ...rbac,
+        });
     });
 }
 exports.default = AuthController;
