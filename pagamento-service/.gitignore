@@ -1,0 +1,15 @@
+# Dependências
+node_modules/
+
+# Arquivos gerados
+dist/
+coverage/
+*.tsbuildinfo
+
+# Configurações locais e segredos
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
