@@ -1,4 +1,10 @@
-import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from 'sequelize';
+import {
+  CreationOptional,
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 import sequelize from '../config/database';
 import User from './User';
 
@@ -19,9 +25,21 @@ Aula.init(
     materia: { type: DataTypes.STRING, allowNull: false },
     valor: { type: DataTypes.FLOAT, allowNull: false },
     descricao: { type: DataTypes.TEXT, allowNull: true },
-    imageUrl: { type: DataTypes.TEXT('long'), allowNull: true, defaultValue: null },
-    status: { type: DataTypes.ENUM('ativa', 'bloqueada'), allowNull: false, defaultValue: 'ativa' },
-    motivoBloqueio: { type: DataTypes.TEXT, allowNull: true, defaultValue: null },
+    imageUrl: {
+      type: DataTypes.TEXT('long'),
+      allowNull: true,
+      defaultValue: null,
+    },
+    status: {
+      type: DataTypes.ENUM('ativa', 'bloqueada'),
+      allowNull: false,
+      defaultValue: 'ativa',
+    },
+    motivoBloqueio: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      defaultValue: null,
+    },
     professorId: {
       type: DataTypes.INTEGER,
       allowNull: false,

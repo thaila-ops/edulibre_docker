@@ -13,27 +13,20 @@ class AdminController {
   );
 
   // Mantidas para compatibilidade com o front-end atual.
-  public static promote = asyncHandler(
-    async (req: Request, res: Response) => {
-      const context = await RbacService.grantRole(
-        Number(req.params.id),
-        'admin',
-      );
+  public static promote = asyncHandler(async (req: Request, res: Response) => {
+    const context = await RbacService.grantRole(Number(req.params.id), 'admin');
 
-      res.status(200).json(context);
-    },
-  );
+    res.status(200).json(context);
+  });
 
-  public static demote = asyncHandler(
-    async (req: Request, res: Response) => {
-      const context = await RbacService.revokeRole(
-        Number(req.params.id),
-        'admin',
-      );
+  public static demote = asyncHandler(async (req: Request, res: Response) => {
+    const context = await RbacService.revokeRole(
+      Number(req.params.id),
+      'admin',
+    );
 
-      res.status(200).json(context);
-    },
-  );
+    res.status(200).json(context);
+  });
 
   public static grantRole = asyncHandler(
     async (req: Request, res: Response) => {
@@ -43,10 +36,7 @@ class AdminController {
         throw new HttpError(400, 'Informe a role a conceder.');
       }
 
-      const context = await RbacService.grantRole(
-        Number(req.params.id),
-        role,
-      );
+      const context = await RbacService.grantRole(Number(req.params.id), role);
 
       res.status(200).json(context);
     },

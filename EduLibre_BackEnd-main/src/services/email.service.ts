@@ -6,10 +6,7 @@ type WelcomeEmailInput = {
 };
 
 export default class EmailService {
-  public static async sendWelcomeEmail({
-    name,
-    email,
-  }: WelcomeEmailInput) {
+  public static async sendWelcomeEmail({ name, email }: WelcomeEmailInput) {
     const host = process.env.SMTP_HOST;
     const port = Number(process.env.SMTP_PORT);
     const user = process.env.SMTP_USER;

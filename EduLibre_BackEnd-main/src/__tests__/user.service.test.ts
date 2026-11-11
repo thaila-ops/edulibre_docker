@@ -42,24 +42,28 @@ describe('UserService', () => {
   });
 
   test('rejects weak password on create', async () => {
-    await expect(UserService.create({
-      name: 'Ana',
-      email: 'ana@teste.com',
-      password: '123',
-      cpf: '12345678901',
-      dataNascimento: '1990-05-10',
-      tipo: 'usuario',
-    })).rejects.toBeInstanceOf(HttpError);
+    await expect(
+      UserService.create({
+        name: 'Ana',
+        email: 'ana@teste.com',
+        password: '123',
+        cpf: '12345678901',
+        dataNascimento: '1990-05-10',
+        tipo: 'usuario',
+      }),
+    ).rejects.toBeInstanceOf(HttpError);
   });
 
   test('prevents email change on update', async () => {
-    await expect(UserService.update(1, {
-      name: 'Ana',
-      cpf: '12345678901',
-      dataNascimento: '1990-05-10',
-      tipo: 'usuario',
-      email: 'novo@teste.com',
-    })).rejects.toThrow('O e-mail não pode ser alterado.');
+    await expect(
+      UserService.update(1, {
+        name: 'Ana',
+        cpf: '12345678901',
+        dataNascimento: '1990-05-10',
+        tipo: 'usuario',
+        email: 'novo@teste.com',
+      }),
+    ).rejects.toThrow('O e-mail não pode ser alterado.');
   });
 
   test('authenticates only existing users with valid password', async () => {

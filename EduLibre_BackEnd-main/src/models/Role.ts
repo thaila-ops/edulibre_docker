@@ -1,4 +1,5 @@
 import {
+  BelongsToManyAddAssociationMixin,
   CreationOptional,
   DataTypes,
   InferAttributes,
@@ -6,16 +7,15 @@ import {
   Model,
 } from 'sequelize';
 import sequelize from '../config/database';
+import type Permission from './Permission';
 
-class Role extends Model<
-  InferAttributes<Role>,
-  InferCreationAttributes<Role>
-> {
+class Role extends Model<InferAttributes<Role>, InferCreationAttributes<Role>> {
   declare id: CreationOptional<number>;
   declare key: string;
   declare name: string;
   declare description: CreationOptional<string | null>;
   declare isSuperAdmin: CreationOptional<boolean>;
+  declare addPermission: BelongsToManyAddAssociationMixin<Permission, number>;
 }
 
 Role.init(

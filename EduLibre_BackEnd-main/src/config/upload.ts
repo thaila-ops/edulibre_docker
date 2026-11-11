@@ -10,18 +10,9 @@ fs.mkdirSync(uploadDirectory, {
   recursive: true,
 });
 
-const allowedMimeTypes = [
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-];
+const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
-const allowedExtensions = [
-  '.jpg',
-  '.jpeg',
-  '.png',
-  '.webp',
-];
+const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
 
 const storage = multer.diskStorage({
   destination: (_req, _file, callback) => {
@@ -38,10 +29,7 @@ const storage = multer.diskStorage({
         .replace(/-+/g, '-')
         .slice(0, 80) || 'imagem';
 
-    callback(
-      null,
-      `${safeName}-${Date.now()}-${randomUUID()}${extension}`,
-    );
+    callback(null, `${safeName}-${Date.now()}-${randomUUID()}${extension}`);
   },
 });
 
@@ -60,10 +48,7 @@ const upload = multer({
 
     if (!validMimeType || !validExtension) {
       return callback(
-        new HttpError(
-          400,
-          'Envie uma imagem JPG, JPEG, PNG ou WEBP.',
-        ),
+        new HttpError(400, 'Envie uma imagem JPG, JPEG, PNG ou WEBP.'),
       );
     }
 

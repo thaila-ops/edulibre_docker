@@ -1,3 +1,5 @@
+import type { PageParams } from '../dtos/user.dto';
+import { requireAuthUser } from '../utils/auth-user';
 import { Request, Response } from 'express';
 import UserService from '../services/user.service';
 import asyncHandler from '../utils/async-handler';
@@ -7,12 +9,12 @@ import EmailService from '../services/email.service';
 
 class UsersController {
   public static findAll = asyncHandler(async (req: Request, res: Response) => {
-    const users = await UserService.list(req.query as { page?: string; pageSize?: string });
+    const users = await UserService.list(req.query as PageParams);
     res.status(200).json(users);
   });
 
   public static profile = asyncHandler(async (req: Request, res: Response) => {
-    const user = await UserService.findById(req.authUser!.id);
+    const user = await UserService.findById(requireAuthUser(req).id);
     res.status(200).json(user);
   });
 
@@ -21,54 +23,44 @@ class UsersController {
     res.status(200).json(user);
   });
 
- public static create = asyncHandler(async (req: Request, res: Response) => {
-  const user = await UserService.create(req.body);
+  public static create = asyncHandler(async (req: Request, res: Response) => {
+    const user = await UserService.create(req.body);
 
-  await RbacService.grantRole(user.id, 'aluno');
+    await RbacService.grantRole(user.id, 'aluno');
 
-  try {
-    await EmailService.sendWelcomeEmail({
-      name: user.name,
-      email: user.email,
-    });
-  } catch (error) {
-    console.error('Falha ao enviar e-mail de boas-vindas:', error);
-  }
+    try {
+      await EmailService.sendWelcomeEmail({
+        name: user.name,
+        email: user.email,
+      });
+    } catch (error) {
+      console.error('Falha ao enviar e-mail de boas-vindas:', error);
+    }
 
-  res.status(201).json(user);
-});
-
-
-
-
-
-public static update = asyncHandler(async (req: Request, res: Response) => {
-  const targetUserId = Number(req.params.id);
-  const authUserId = req.authUser?.id;
-
-  if (!authUserId) {
-    throw new HttpError(401, 'Não autenticado.');
-  }
-
-  if (authUserId !== targetUserId) {
-    throw new HttpError(403, 'Você só pode editar o próprio perfil.');
-  }
-
-  const avatarUrl = req.file
-    ? `/uploads/${req.file.filename}`
-    : req.body.avatarUrl;
-
-  const user = await UserService.update(targetUserId, {
-    ...req.body,
-    avatarUrl,
+    res.status(201).json(user);
   });
 
-  res.status(200).json(user);
-});
+  public static update = asyncHandler(async (req: Request, res: Response) => {
+    const targetUserId = Number(req.params.id);
+    const authUserId = requireAuthUser(req).id;
+    if (authUserId !== targetUserId) {
+      throw new HttpError(403, 'Você só pode editar o próprio perfil.');
+    }
+
+    const avatarUrl = req.file
+      ? `/uploads/${req.file.filename}`
+      : req.body.avatarUrl;
+
+    const user = await UserService.update(targetUserId, {
+      ...req.body,
+      avatarUrl,
+    });
+
+    res.status(200).json(user);
+  });
   public static remove = asyncHandler(async (req: Request, res: Response) => {
     const targetUserId = Number(req.params.id);
-    const authUserId = req.authUser?.id;
-    if (!authUserId) throw new HttpError(401, 'Não autenticado.');
+    const authUserId = requireAuthUser(req).id;
     if (authUserId !== targetUserId) {
       throw new HttpError(403, 'Você só pode remover o próprio perfil.');
     }
@@ -78,17 +70,17 @@ public static update = asyncHandler(async (req: Request, res: Response) => {
     await UserService.remove(targetUserId);
     res.status(204).send();
   });
-   
-  public static tornarProfessor = asyncHandler(
-  async (req: Request, res: Response) => {
-    const context = await RbacService.grantRole(
-      req.authUser!.id,
-      'professor',
-    );
 
-    res.status(200).json(context);
-  },
-);
+  public static tornarProfessor = asyncHandler(
+    async (req: Request, res: Response) => {
+      const context = await RbacService.grantRole(
+        requireAuthUser(req).id,
+        'professor',
+      );
+
+      res.status(200).json(context);
+    },
+  );
 }
 
 export default UsersController;

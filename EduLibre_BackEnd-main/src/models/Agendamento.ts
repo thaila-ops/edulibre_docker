@@ -1,9 +1,18 @@
-import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from 'sequelize';
+import {
+  CreationOptional,
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 import sequelize from '../config/database';
 import Aula from './Aula';
 import User from './User';
 
-class Agendamento extends Model<InferAttributes<Agendamento>, InferCreationAttributes<Agendamento>> {
+class Agendamento extends Model<
+  InferAttributes<Agendamento>,
+  InferCreationAttributes<Agendamento>
+> {
   declare id: CreationOptional<number>;
   declare alunoId: number;
   declare aulaId: number;
@@ -26,8 +35,16 @@ Agendamento.init(
       references: { model: 'Aulas', key: 'id' },
     },
     data: { type: DataTypes.DATE, allowNull: false },
-    bookingStatus: { type: DataTypes.ENUM('pendente', 'aceito', 'recusado'), allowNull: false, defaultValue: 'pendente' },
-    paymentStatus: { type: DataTypes.ENUM('pendente', 'pago'), allowNull: false, defaultValue: 'pendente' },
+    bookingStatus: {
+      type: DataTypes.ENUM('pendente', 'aceito', 'recusado'),
+      allowNull: false,
+      defaultValue: 'pendente',
+    },
+    paymentStatus: {
+      type: DataTypes.ENUM('pendente', 'pago'),
+      allowNull: false,
+      defaultValue: 'pendente',
+    },
   },
   { sequelize, tableName: 'Agendamentos' },
 );
