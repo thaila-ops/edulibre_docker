@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import normalizeLegacyBirthDates from './config/database/normalize-legacy-birth-dates';
 import app from './app';
 import sequelize from './config/database';
 import './models/User';
@@ -11,33 +12,24 @@ import './models/Permission';
 import './models/RolePermission';
 import './models/UserRoleAssignment';
 import RbacService from './services/rbac.service';
-
+import { redisClient } from './config/redis';
 
 const port = Number(process.env.PORT) || 3001;
 
-async function normalizeLegacyBirthDates() {
-  try {
-    await sequelize.query(`
-      ALTER TABLE Users
-      MODIFY COLUMN dataNascimento DATE NULL
-    `);
-
-    await sequelize.query(`
-      UPDATE Users
-      SET dataNascimento = NULL
-      WHERE dataNascimento = '0000-00-00'
-    `);
-  } catch {
-    // Banco novo ou schema antigo sem a coluna ainda.
-  }
-}
-
 async function startServer() {
   await normalizeLegacyBirthDates();
-  await sequelize.sync({ alter: true });
+  await sequelize.sync();
   await RbacService.seed();
   await RbacService.migrateLegacyUsers();
-  app.listen(port, () => console.log(`Servidor EduLivre rodando na porta ${port}`));
+  app.listen(port, () =>
+    console.log(`Servidor EduLivre rodando na porta ${port}`),
+  );
 }
 
-startServer().catch((error: Error) => console.error('Falha ao iniciar servidor:', error.message));
+startServer().catch((error: Error) =>
+  console.error('Falha ao iniciar servidor:', error.message),
+);
+
+void redisClient.connect().catch((error: Error) => {
+  console.warn('[Redis] Não foi possível iniciar a conexão:', error.message);
+});

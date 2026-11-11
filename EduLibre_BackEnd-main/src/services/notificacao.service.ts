@@ -1,12 +1,6 @@
+import type { LessonNotificationData } from '../dtos/notificacao.dto';
 import Notificacao from '../models/Notificacao';
 import HttpError from '../utils/http-error';
-
-type LessonNotificationData = {
-  userId: number;
-  aulaId: number;
-  materia: string;
-  motivo?: string | null;
-};
 
 export default class NotificacaoService {
   public static async aulaBloqueada(data: LessonNotificationData) {
@@ -31,29 +25,26 @@ export default class NotificacaoService {
     });
   }
   public static async listarDoUsuario(userId: number) {
-  return Notificacao.findAll({
-    where: { userId },
-    order: [['createdAt', 'DESC']],
-  });
-}
-
-public static async marcarComoLida(
-  notificacaoId: number,
-  userId: number,
-) {
-  const notificacao = await Notificacao.findOne({
-    where: {
-      id: notificacaoId,
-      userId,
-    },
-  });
-
-  if (!notificacao) {
-    throw new HttpError(404, 'Notificação não encontrada.');
+    return Notificacao.findAll({
+      where: { userId },
+      order: [['createdAt', 'DESC']],
+    });
   }
 
-  await notificacao.update({ lida: true });
+  public static async marcarComoLida(notificacaoId: number, userId: number) {
+    const notificacao = await Notificacao.findOne({
+      where: {
+        id: notificacaoId,
+        userId,
+      },
+    });
 
-  return notificacao;
-}
+    if (!notificacao) {
+      throw new HttpError(404, 'Notificação não encontrada.');
+    }
+
+    await notificacao.update({ lida: true });
+
+    return notificacao;
+  }
 }

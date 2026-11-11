@@ -3,11 +3,7 @@ import TokenService from '../services/token.service';
 import User from '../models/User';
 import RbacService from '../services/rbac.service';
 
-async function authMiddleware(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
+async function authMiddleware(req: Request, res: Response, next: NextFunction) {
   const authorization = req.headers.authorization;
 
   if (!authorization) {

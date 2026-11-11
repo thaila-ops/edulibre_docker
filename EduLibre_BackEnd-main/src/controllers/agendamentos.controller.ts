@@ -1,16 +1,21 @@
+import type { AgendamentoFilters } from '../dtos/agendamento.dto';
+import { requireAuthUser } from '../utils/auth-user';
 import { Request, Response } from 'express';
 import AgendamentoService from '../services/agendamento.service';
 import asyncHandler from '../utils/async-handler';
-import HttpError from '../utils/http-error';
 
 class AgendamentosController {
   public static findAll = asyncHandler(async (req: Request, res: Response) => {
-    const agendamentos = await AgendamentoService.list(req.query as { alunoId?: string; aulaId?: string; professorId?: string; page?: string; pageSize?: string });
+    const agendamentos = await AgendamentoService.list(
+      req.query as AgendamentoFilters,
+    );
     res.status(200).json(agendamentos);
   });
 
   public static getById = asyncHandler(async (req: Request, res: Response) => {
-    const agendamento = await AgendamentoService.findById(Number(req.params.id));
+    const agendamento = await AgendamentoService.findById(
+      Number(req.params.id),
+    );
     res.status(200).json(agendamento);
   });
 
@@ -20,7 +25,10 @@ class AgendamentosController {
   });
 
   public static update = asyncHandler(async (req: Request, res: Response) => {
-    const agendamento = await AgendamentoService.update(Number(req.params.id), req.body);
+    const agendamento = await AgendamentoService.update(
+      Number(req.params.id),
+      req.body,
+    );
     res.status(200).json(agendamento);
   });
 
@@ -30,23 +38,31 @@ class AgendamentosController {
   });
 
   public static pay = asyncHandler(async (req: Request, res: Response) => {
-    const authUserId = req.authUser?.id;
-    if (!authUserId) throw new HttpError(401, 'Não autenticado.');
-    const agendamento = await AgendamentoService.pay(Number(req.params.id), authUserId);
+    const authUserId = requireAuthUser(req).id;
+    const agendamento = await AgendamentoService.pay(
+      Number(req.params.id),
+      authUserId,
+    );
     res.status(200).json(agendamento);
   });
 
   public static accept = asyncHandler(async (req: Request, res: Response) => {
-    const authUserId = req.authUser?.id;
-    if (!authUserId) throw new HttpError(401, 'Não autenticado.');
-    const agendamento = await AgendamentoService.decide(Number(req.params.id), authUserId, 'aceito');
+    const authUserId = requireAuthUser(req).id;
+    const agendamento = await AgendamentoService.decide(
+      Number(req.params.id),
+      authUserId,
+      'aceito',
+    );
     res.status(200).json(agendamento);
   });
 
   public static reject = asyncHandler(async (req: Request, res: Response) => {
-    const authUserId = req.authUser?.id;
-    if (!authUserId) throw new HttpError(401, 'Não autenticado.');
-    const agendamento = await AgendamentoService.decide(Number(req.params.id), authUserId, 'recusado');
+    const authUserId = requireAuthUser(req).id;
+    const agendamento = await AgendamentoService.decide(
+      Number(req.params.id),
+      authUserId,
+      'recusado',
+    );
     res.status(200).json(agendamento);
   });
 }

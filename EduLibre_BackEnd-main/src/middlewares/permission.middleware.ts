@@ -1,11 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 export function requirePermission(permissionKey: string) {
-  return (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     if (!req.authUser) {
       return res.status(401).json({
         message: 'Não autenticado.',
@@ -27,11 +23,7 @@ export function requirePermission(permissionKey: string) {
 }
 
 export function requireRole(roleKey: string) {
-  return (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     if (!req.authUser) {
       return res.status(401).json({
         message: 'Não autenticado.',

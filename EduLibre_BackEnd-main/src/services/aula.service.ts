@@ -1,3 +1,5 @@
+import { serializeAula } from '../serializers/aula.serializer';
+import type { AulaPayload, AulaFilters } from '../dtos/aula.dto';
 import { Op } from 'sequelize';
 import Aula from '../models/Aula';
 import User from '../models/User';
@@ -5,92 +7,179 @@ import Avaliacao from '../models/Avaliacao';
 import Agendamento from '../models/Agendamento';
 import HttpError from '../utils/http-error';
 import { buildPage, getPageRequest } from '../utils/pagination';
-import { ensureAdult, requireText, validateOptionalUrl, validatePositiveNumber } from '../utils/validators';
-
-type AulaPayload = {
-  materia: string;
-  valor: number;
-  descricao?: string;
-  professorId: number;
-  imageUrl?: string;
-};
-
-type AulaFilters = {
-  materia?: string;
-  professorId?: string;
-  page?: string;
-  pageSize?: string;
-  status?: string;
-};
+import {
+  ensureAdult,
+  requireText,
+  validateOptionalUrl,
+  validatePositiveNumber,
+} from '../utils/validators';
+import CacheService from './cache.service';
+import type { PaginationResult } from '../types/api';
 
 const AULA_INCLUDE = [
-  { model: User, as: 'professor', attributes: ['id', 'name', 'email', 'cpf', 'dataNascimento', 'tipo', 'avatarUrl', 'bio'] },
-  { model: Avaliacao, as: 'avaliacoes', include: [{ model: User, as: 'aluno', attributes: ['id', 'name', 'avatarUrl'] }] },
+  {
+    model: User,
+    as: 'professor',
+    attributes: [
+      'id',
+      'name',
+      'email',
+      'cpf',
+      'dataNascimento',
+      'tipo',
+      'avatarUrl',
+      'bio',
+    ],
+  },
+  {
+    model: Avaliacao,
+    as: 'avaliacoes',
+    include: [
+      { model: User, as: 'aluno', attributes: ['id', 'name', 'avatarUrl'] },
+    ],
+  },
   { model: Agendamento, as: 'agendamentos' },
 ];
 
 export default class AulaService {
   public static async list(filters: AulaFilters) {
     const pageRequest = getPageRequest(filters.page, filters.pageSize);
+
+    const version = await CacheService.getVersion('aulas');
+
+    const cacheKey =
+      version !== null
+        ? `${AulaService.buildListCacheKey(
+          filters,
+          pageRequest.page,
+          pageRequest.pageSize,
+        )}:${version}`
+        : null;
+
+    type Lesson = ReturnType<typeof serializeAula>;
+
+    if (cacheKey !== null) {
+      const cached = await CacheService.get<PaginationResult<Lesson>>(cacheKey);
+
+      if (cached !== null) {
+        return cached;
+      }
+    }
+
     const result = await Aula.findAndCountAll({
-      where: AulaService.buildWhere(filters.materia, filters.professorId, filters.status),
+      where: AulaService.buildWhere(
+        filters.materia,
+        filters.professorId,
+        filters.status,
+      ),
       include: AULA_INCLUDE,
       limit: pageRequest.limit,
       offset: pageRequest.offset,
       order: [['id', 'DESC']],
       distinct: true,
     });
-    return buildPage(result.rows.map((item) => AulaService.serialize(item)), result.count, pageRequest.page, pageRequest.pageSize);
+
+    const response = buildPage(
+      result.rows.map((item) => serializeAula(item)),
+      result.count,
+      pageRequest.page,
+      pageRequest.pageSize,
+    );
+
+    if (cacheKey !== null) {
+      await CacheService.set(cacheKey, response);
+    }
+
+    return response;
   }
 
   public static async featured() {
+    const version = await CacheService.getVersion('aulas');
+
+    const cacheKey =
+      version !== null ? `edulibre:aulas:featured:${version}` : null;
+
+    type Lesson = ReturnType<typeof serializeAula>;
+
+    if (cacheKey !== null) {
+      const cached = await CacheService.get<Lesson[]>(cacheKey);
+
+      if (cached !== null) {
+        return cached;
+      }
+    }
+
     const lessons = await Aula.findAll({
       where: { status: 'ativa' },
       include: AULA_INCLUDE,
       limit: 3,
       order: [['id', 'DESC']],
     });
-    return lessons.map((item) => AulaService.serialize(item));
+
+    const response = lessons.map((item) => serializeAula(item));
+
+    if (cacheKey !== null) {
+      await CacheService.set(cacheKey, response);
+    }
+
+    return response;
   }
 
-  public static async block(id: number, motivo: string) {
-    const aula = await Aula.findByPk(id);
-    if (!aula) throw new HttpError(404, 'Aula não encontrada.');
-    await aula.update({ status: 'bloqueada', motivoBloqueio: requireText(motivo, 'Motivo do bloqueio') });
-    return AulaService.findById(aula.id);
-  }
+ public static async block(id: number, motivo: string) {
+  const aula = await AulaService.requireById(id);
+
+  await aula.update({
+    status: 'bloqueada',
+    motivoBloqueio: requireText(motivo, 'Motivo do bloqueio'),
+  });
+
+  await CacheService.invalidate('aulas');
+
+  return AulaService.findById(aula.id);
+}
 
   public static async unblock(id: number) {
-    const aula = await Aula.findByPk(id);
-    if (!aula) throw new HttpError(404, 'Aula não encontrada.');
-    await aula.update({ status: 'ativa', motivoBloqueio: null });
+    const aula = await AulaService.requireById(id);
+
+    await aula.update({
+      status: 'ativa',
+      motivoBloqueio: null,
+    });
+
+    await CacheService.invalidate('aulas');
+
     return AulaService.findById(aula.id);
   }
 
   public static async findById(id: number) {
-    const aula = await Aula.findByPk(id, { include: AULA_INCLUDE });
-    if (!aula) throw new HttpError(404, 'Aula não encontrada.');
-    return AulaService.serialize(aula);
+    const aula = await AulaService.requireById(id, true);
+    return serializeAula(aula);
   }
-
   public static async create(payload: AulaPayload) {
     await AulaService.ensureProfessor(payload.professorId);
+
     const aula = await Aula.create(AulaService.buildPayload(payload));
+
+    await CacheService.invalidate('aulas');
+
     return AulaService.findById(aula.id);
   }
-
   public static async update(id: number, payload: AulaPayload) {
     await AulaService.ensureProfessor(payload.professorId);
-    const aula = await Aula.findByPk(id);
-    if (!aula) throw new HttpError(404, 'Aula não encontrada.');
+
+    const aula = await AulaService.requireById(id);
+
     await aula.update(AulaService.buildPayload(payload));
+
+    await CacheService.invalidate('aulas');
+
     return AulaService.findById(aula.id);
   }
-
   public static async remove(id: number) {
-    const aula = await Aula.findByPk(id);
-    if (!aula) throw new HttpError(404, 'Aula não encontrada.');
+    const aula = await AulaService.requireById(id);
+
     await aula.destroy();
+    await CacheService.invalidate('aulas');
   }
 
   private static buildPayload(payload: AulaPayload) {
@@ -102,8 +191,27 @@ export default class AulaService {
       professorId: Number(payload.professorId),
     };
   }
+  private static buildListCacheKey(
+    filters: AulaFilters,
+    page: number,
+    pageSize: number,
+  ): string {
+    const query = {
+      materia: filters.materia ?? '',
+      professorId: filters.professorId ?? '',
+      status: filters.status || 'ativa',
+      page,
+      pageSize,
+    };
 
-  private static buildWhere(materia?: string, professorId?: string, status?: string) {
+    return `edulibre:aulas:list:${JSON.stringify(query)}`;
+  }
+
+  private static buildWhere(
+    materia?: string,
+    professorId?: string,
+    status?: string,
+  ) {
     return {
       ...(materia ? { materia: { [Op.like]: `%${materia.trim()}%` } } : {}),
       ...(professorId ? { professorId: Number(professorId) } : {}),
@@ -118,34 +226,12 @@ export default class AulaService {
     ensureAdult(professor.dataNascimento, 'vender aulas');
   }
 
-  private static serialize(aula: Aula) {
-    const plain = aula.toJSON() as Aula & {
-      professor?: User;
-      avaliacoes?: Avaliacao[];
-      agendamentos?: Agendamento[];
-    };
-    const reviews = plain.avaliacoes ?? [];
-    const bookings = plain.agendamentos ?? [];
-    const paidBookings = bookings.filter((item) => item.paymentStatus === 'pago');
-    const average = reviews.length
-      ? reviews.reduce((total, item) => total + item.nota, 0) / reviews.length
-      : 0;
-
-    return {
-      id: plain.id,
-      materia: plain.materia,
-      valor: plain.valor,
-      descricao: plain.descricao,
-      imageUrl: plain.imageUrl,
-      status: plain.status,
-      motivoBloqueio: plain.motivoBloqueio,
-      professorId: plain.professorId,
-      professor: plain.professor,
-      reviewCount: reviews.length,
-      averageRating: Number(average.toFixed(1)),
-      bookingCount: bookings.length,
-      paidBookingCount: paidBookings.length,
-      avaliacoes: reviews,
-    };
+  private static async requireById(id: number, withRelations = false) {
+    const aula = await Aula.findByPk(
+      id,
+      withRelations ? { include: AULA_INCLUDE } : undefined,
+    );
+    if (!aula) throw new HttpError(404, 'Aula não encontrada.');
+    return aula;
   }
 }

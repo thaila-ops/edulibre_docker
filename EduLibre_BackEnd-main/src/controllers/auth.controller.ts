@@ -1,3 +1,4 @@
+import { requireAuthUser } from '../utils/auth-user';
 import { Request, Response } from 'express';
 import asyncHandler from '../utils/async-handler';
 import UserService from '../services/user.service';
@@ -35,7 +36,7 @@ class AuthController {
   });
 
   public static me = asyncHandler(async (req, res) => {
-    const user = await UserService.findById(req.authUser!.id);
+    const user = await UserService.findById(requireAuthUser(req).id);
 
     const rbac = await RbacService.getAuthContext(user.id);
 

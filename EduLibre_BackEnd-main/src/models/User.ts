@@ -1,4 +1,10 @@
-import { DataTypes, InferAttributes, InferCreationAttributes, Model, CreationOptional } from 'sequelize';
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+  CreationOptional,
+} from 'sequelize';
 import sequelize from '../config/database';
 import { UserRole } from '../types/api';
 
@@ -21,8 +27,16 @@ User.init(
     email: { type: DataTypes.STRING, allowNull: false, unique: true },
     password: { type: DataTypes.STRING, allowNull: false },
     cpf: { type: DataTypes.STRING(11), allowNull: false, unique: true },
-    dataNascimento: { type: DataTypes.DATEONLY, allowNull: true, defaultValue: null },
-    tipo: { type: DataTypes.ENUM('usuario', 'admin'), allowNull: false, defaultValue: 'usuario' },
+    dataNascimento: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+      defaultValue: null,
+    },
+    tipo: {
+      type: DataTypes.ENUM('usuario', 'admin'),
+      allowNull: false,
+      defaultValue: 'usuario',
+    },
     avatarUrl: { type: DataTypes.TEXT, allowNull: true, defaultValue: null },
     bio: { type: DataTypes.TEXT, allowNull: true, defaultValue: null },
   },
