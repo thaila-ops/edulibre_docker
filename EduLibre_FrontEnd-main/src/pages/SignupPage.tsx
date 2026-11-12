@@ -2,7 +2,7 @@ import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Feedback from '../components/Feedback';
 import FormField from '../components/FormField';
-import { createUser } from '../services/http';
+import { createUser } from '../services/users';
 import { getErrorMessage, isAdult, validateBirthDate, validateCpf, validateEmail, validatePassword } from '../utils/validation';
 
 function formatCpf(value: string) {

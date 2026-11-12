@@ -1,36 +1,43 @@
-import { useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import DataTable from '../components/DataTable';
 import Feedback from '../components/Feedback';
 import PageHeader from '../components/PageHeader';
 import Pagination from '../components/Pagination';
+import usePaginatedResource from '../hooks/usePaginatedResource';
 import usePagination from '../hooks/usePagination';
-import { deleteUser, fetchUsers } from '../services/http';
+import { deleteUser, fetchUsers } from '../services/users';
 import { User } from '../types';
 import { getErrorMessage } from '../utils/validation';
 
 function UsersPage() {
   const { page, pageSize, setPage } = usePagination();
-  const [items, setItems] = useState<User[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    fetchUsers({ page, pageSize })
-      .then((response) => {
-        setItems(response.data);
-        setTotalPages(response.totalPages);
-      })
-      .catch((requestError) => setError(getErrorMessage(requestError)));
-  }, [page, pageSize]);
+  const loadPage = useCallback(
+    () => fetchUsers({ page, pageSize }),
+    [page, pageSize],
+  );
+  const { items, setItems, totalPages, error, setError } =
+    usePaginatedResource<User>(loadPage);
 
   async function handleDelete(id: number) {
-    await deleteUser(id);
-    setItems((current: User[]) => current.filter((item: User) => item.id !== id));
+    try {
+      setError('');
+      await deleteUser(id);
+      setItems((current: User[]) =>
+        current.filter((item: User) => item.id !== id),
+      );
+    } catch (requestError) {
+      setError(getErrorMessage(requestError));
+    }
   }
 
   return (
     <section>
-      <PageHeader title="Utilizadores" description="CRUD completo de utilizadores com CPF, senha forte e e-mail imutável." actionLabel="Novo utilizador" actionTo="/app/usuarios/novo" />
+      <PageHeader
+        title="Utilizadores"
+        description="CRUD completo de utilizadores com CPF, senha forte e e-mail imutável."
+        actionLabel="Novo utilizador"
+        actionTo="/app/usuarios/novo"
+      />
       {error ? <Feedback message={error} /> : null}
       <DataTable<User>
         items={items}

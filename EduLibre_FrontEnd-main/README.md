@@ -1,70 +1,75 @@
-# Getting Started with Create React App
+# EduLibre — Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Aplicação web em React e TypeScript, criada com Create React App. Consome a API do EduLibre para cadastro, autenticação, aulas, agendamentos e administração.
 
-## Available Scripts
+## Executar
 
-In the project directory, you can run:
+Na pasta `EduLibre_FrontEnd-main`:
 
-### `npm start`
+```powershell
+npm ci
+npm start
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Consulte `.env.example` para configurar `REACT_APP_API_URL`. Nunca coloque credenciais nos arquivos do frontend: variáveis `REACT_APP_*` são incorporadas ao JavaScript entregue ao navegador.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Organização
 
-### `npm test`
+```text
+src/
+  App.tsx                  Composição do cabeçalho, rotas e rodapé
+  main.tsx                 Inicialização do React e dos providers
+  routes/AppRoutes.tsx     Rotas públicas e grupos protegidos por papel
+  pages/                   Telas que compõem componentes e conectam ações
+  components/
+    home/                  Seções da página inicial e destaques
+    lessons/               Cartão de aula, imagem e avaliações
+    bookings/              Status e ações de decisão dos agendamentos
+    dashboard/             Cartões da área da conta
+    admin/                 Cartão de moderação de aulas
+    Table.tsx              Estrutura de tabela e estado vazio
+    DataTable.tsx          Tabela com ações de edição e exclusão
+    StatsGrid.tsx          Indicadores usados nos painéis
+  hooks/                   Carregamento e estado reutilizável das telas
+  services/                Requisições HTTP separadas por domínio
+  contexts/                Sessão e autenticação
+  utils/                   Validações e funções independentes de React
+  types.ts                 Contratos compartilhados das respostas da API
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Responsabilidades
 
-### `npm run build`
+- **Páginas:** definem a composição da tela. Reutilizam componentes e delegam carregamentos compartilhados aos hooks.
+- **Componentes:** recebem dados e callbacks pelas propriedades. Cartões e tabelas não precisam conhecer os endpoints da API.
+- **Hooks:** coordenam estado, carregamento e ações. `usePaginatedResource` recebe uma função estabilizada com `useCallback` e ignora resultados de consultas anteriores. O parâmetro `enabled` impede requisições que ainda dependem da sessão.
+- **Serviços:** `auth`, `users`, `lessons`, `bookings`, `reviews`, `notifications` e `admin` contêm os contratos HTTP de cada assunto. Todos usam o cliente Axios de `api.ts`. `http.ts` mantém reexports para compatibilidade; novos imports devem apontar para o domínio específico.
+- **Rotas:** `AppRoutes` agrupa acesso público, autenticado, professor e administrador. `ProtectedRoute` verifica a sessão antes de renderizar o `Outlet`. A autorização definitiva continua sendo responsabilidade do backend.
+- **Estilos:** as classes e folhas de estilo existentes foram preservadas para manter o visual. Esta refatoração não migra a aplicação para outro framework nem reorganiza toda a cascata CSS.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Validação
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```powershell
+npm test -- --watchAll=false --runInBand
+npx tsc --noEmit
+npm run build
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Os testes cobrem os formulários existentes, destaques da home, proteção de rotas, decisões sobre agendamentos e concorrência no carregamento paginado.
 
-### `npm run eject`
+Para executar apenas os testes de navegador contra um ambiente que já esteja funcionando:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```powershell
+npx playwright test
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+O script legado `npm run test:e2e` executa `docker compose down -v` e remove volumes. Ele não deve ser usado para validar uma refatoração em um ambiente com dados que precisam ser preservados.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Como evoluir
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+1. Adicione chamadas de API ao arquivo de serviço do domínio correspondente.
+2. Extraia componentes quando houver uma responsabilidade visual clara ou repetição real.
+3. Preserve os textos, URLs, propriedades e classes das telas ao refatorar.
+4. Cubra mudanças de comportamento com testes, especialmente permissões e operações assíncronas.
+5. Execute os testes, a verificação de tipos e a compilação antes da revisão.
 
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+O aplicativo mobile é um projeto separado e permanece inalterado.

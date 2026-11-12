@@ -2,7 +2,8 @@ import { FormEvent, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Feedback from '../components/Feedback';
 import { useAuth } from '../contexts/AuthContext';
-import { createReview, fetchLesson } from '../services/http';
+import { fetchLesson } from '../services/lessons';
+import { createReview } from '../services/reviews';
 import { Lesson } from '../types';
 import { getErrorMessage } from '../utils/validation';
 

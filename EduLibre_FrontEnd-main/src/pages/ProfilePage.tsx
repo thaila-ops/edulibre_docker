@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { fetchLessons } from '../services/http';
+import { fetchLessons } from '../services/lessons';
 import { Lesson } from '../types';
 
 function ProfilePage() {

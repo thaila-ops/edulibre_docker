@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Feedback from '../components/Feedback';
-import { payBooking, fetchBooking } from '../services/http';
+import { payBooking, fetchBooking } from '../services/bookings';
 import { Booking } from '../types';
 import { getErrorMessage } from '../utils/validation';
 

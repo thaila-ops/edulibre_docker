@@ -1047,6 +1047,10 @@ footer {
 /* Responsividade: telas maiores para menores */
 
 @media (max-width: 1100px) {
+  .hero_container { flex-direction: column; gap: 32px; }
+  .hero_left { max-width: 100%; width: 100%; }
+  .hero_visual { flex: none; width: min(540px, 100%); }
+  .hero_visual img { height: auto; aspect-ratio: 4 / 3; }
   .home .teachers_grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1129,6 +1133,15 @@ footer {
 }
 
 @media (max-width: 600px) {
+  .hero { min-height: auto; padding: 32px 20px; }
+  .home .teachers, .benefits, .about, .steps, .cta { padding: 48px 20px; }
+  .hero_left h1 { font-size: clamp(32px, 9vw, 44px); }
+  .teachers h2 { font-size: clamp(30px, 8vw, 44px); }
+  .featured_card, .benefit_card { padding: 20px; overflow-wrap: anywhere; }
+  .benefit_card { min-width: 0; }
+  .featured_card h4, .featured_card > span, .featured_card .muted,
+  .benefit_card h3, .benefit_card p { max-width: 100%; }
+  .steps .step { column-gap: 16px; }
   .hero_left h1 {
     letter-spacing: -1px;
   }
