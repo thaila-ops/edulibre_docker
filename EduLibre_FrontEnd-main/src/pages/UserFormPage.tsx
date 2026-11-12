@@ -5,7 +5,8 @@ import FormField from '../components/FormField';
 import LessonImageUploadField from '../components/LessonImageUploadField';
 import PageHeader from '../components/PageHeader';
 import { useAuth } from '../contexts/AuthContext';
-import { fetchMe, updateUser } from '../services/http';
+import { fetchMe } from '../services/auth';
+import { updateUser } from '../services/users';
 import { getErrorMessage, isAdult, validateBirthDate, validateCpf, validatePassword } from '../utils/validation';
 
 function UserFormPage() {

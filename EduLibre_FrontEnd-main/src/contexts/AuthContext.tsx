@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { fetchMe, loginRequest } from '../services/http';
+import { fetchMe, loginRequest } from '../services/auth';
 import { clearSession, getStoredToken, getStoredUser, saveSession } from '../services/storage';
 import { User } from '../types';
 

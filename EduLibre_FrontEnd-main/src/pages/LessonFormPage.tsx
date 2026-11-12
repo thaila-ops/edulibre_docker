@@ -5,7 +5,7 @@ import FormField from '../components/FormField';
 import LessonImageUploadField from '../components/LessonImageUploadField';
 import PageHeader from '../components/PageHeader';
 import { useAuth } from '../contexts/AuthContext';
-import { createLesson, fetchLesson, updateLesson } from '../services/http';
+import { createLesson, fetchLesson, updateLesson } from '../services/lessons';
 import { getErrorMessage } from '../utils/validation';
 
 function LessonFormPage() {

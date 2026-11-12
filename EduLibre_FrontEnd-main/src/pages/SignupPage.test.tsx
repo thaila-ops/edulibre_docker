@@ -5,7 +5,7 @@ import SignupPage from './SignupPage';
 const mockNavigate = jest.fn();
 const mockCreateUser = jest.fn();
 
-jest.mock('../services/http', () => ({
+jest.mock('../services/users', () => ({
   createUser: (...args: unknown[]) => mockCreateUser(...args),
 }));
 

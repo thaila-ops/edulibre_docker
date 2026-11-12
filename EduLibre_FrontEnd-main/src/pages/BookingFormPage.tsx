@@ -3,7 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Feedback from '../components/Feedback';
 import PageHeader from '../components/PageHeader';
 import { useAuth } from '../contexts/AuthContext';
-import { createBooking, fetchBooking, fetchLessons, updateBooking } from '../services/http';
+import { createBooking, fetchBooking, updateBooking } from '../services/bookings';
+import { fetchLessons } from '../services/lessons';
 import { Booking, Lesson } from '../types';
 import { getErrorMessage } from '../utils/validation';
 

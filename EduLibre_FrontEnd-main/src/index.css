@@ -560,6 +560,17 @@ td {
   flex-wrap: wrap;
 }
 
+/* Allow content to shrink inside grids without hiding horizontal overflow. */
+.grid-3 > *, .form-grid > *, .hero-actions > *, .page-header > * {
+  min-width: 0;
+}
+.content, .marketing-shell, .center-shell {
+  overflow-wrap: anywhere;
+}
+.table-card table { min-width: 600px; }
+.table-card:focus-visible { outline: 2px solid #9ae8ff; outline-offset: 2px; }
+img { max-width: 100%; }
+
 .pagination {
   align-items: center;
   justify-content: flex-end;
@@ -679,6 +690,10 @@ td {
 }
 
 @media (max-width: 600px) {
+  .hero-actions { align-items: stretch; width: 100%; }
+  .hero-actions > a, .hero-actions > button { width: 100%; }
+  .form-grid { grid-template-columns: minmax(0, 1fr); }
+  .sidebar { padding: 20px; }
   .marketing-shell,
   .center-shell,
   .content {
@@ -692,7 +707,7 @@ td {
   .table-card,
   .info-card,
   .center-card {
-    padding: 24px;
+    padding: 16px;
     border-radius: 20px;
   }
 

@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import logo from '../assets/logo.png';
 import { useAuth } from '../contexts/AuthContext';
 import NotificationBell from './NotificationBell';
@@ -7,6 +7,11 @@ import './Headers.css';
 
 function Header() {
   const { token, user, logout } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuButton = useRef<HTMLButtonElement>(null);
+  const location = useLocation();
+
+  useEffect(() => setMenuOpen(false), [location.pathname, token]);
 
   const isProfessor =
     user?.isSuperAdmin ||
@@ -33,14 +38,33 @@ function Header() {
   }, []);
 
   return (
-    <header className="header">
+    <header className="header" onKeyDown={(event) => {
+      if (event.key === 'Escape' && menuOpen) {
+        setMenuOpen(false);
+        menuButton.current?.focus();
+      }
+    }}>
       <div className="header_container">
         <Link to="/" className="logo-link">
           <img src={logo} alt="EduLivre" className="logo_img" />
           <strong>EduLivre</strong>
         </Link>
 
-        <nav className="menu_header">
+        <button
+          ref={menuButton}
+          type="button"
+          className="header_menu-toggle"
+          aria-expanded={menuOpen}
+          aria-controls="main-navigation"
+          onClick={() => setMenuOpen((open) => !open)}
+        >
+          {menuOpen ? 'Fechar menu' : 'Menu'}
+        </button>
+        <nav id="main-navigation" aria-label="Navegação principal"
+          className={`menu_header${menuOpen ? ' menu_header--open' : ''}`}
+          onClick={(event) => {
+            if ((event.target as HTMLElement).closest('a')) setMenuOpen(false);
+          }}>
           <Link to="/">Home</Link>
           <Link to="/professores">Professores</Link>
 

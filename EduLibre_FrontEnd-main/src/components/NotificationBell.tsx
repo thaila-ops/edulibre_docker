@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import {
-  fetchNotifications,
-  markNotificationAsRead,
-} from '../services/http';
+import { fetchNotifications, markNotificationAsRead } from '../services/notifications';
 import { Notification } from '../types';
 
 function NotificationBell() {

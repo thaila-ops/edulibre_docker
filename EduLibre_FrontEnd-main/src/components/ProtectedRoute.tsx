@@ -1,16 +1,13 @@
 import { ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 type ProtectedRouteProps = {
-  children: ReactNode;
+  children?: ReactNode;
   requiredRole?: string;
 };
 
-function ProtectedRoute({
-  children,
-  requiredRole,
-}: ProtectedRouteProps) {
+function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const { token, user, loading } = useAuth();
 
   if (loading) {
@@ -22,15 +19,13 @@ function ProtectedRoute({
   }
 
   const hasRequiredRole =
-    !requiredRole ||
-    user?.isSuperAdmin ||
-    user?.roles?.includes(requiredRole);
+    !requiredRole || user?.isSuperAdmin || user?.roles?.includes(requiredRole);
 
   if (!hasRequiredRole) {
     return <Navigate to="/conta" replace />;
   }
 
-  return <>{children}</>;
+  return <>{children ?? <Outlet />}</>;
 }
 
 export default ProtectedRoute;
