@@ -15,6 +15,7 @@ import {
 } from '../utils/validators';
 import CacheService from './cache.service';
 import type { PaginationResult } from '../types/api';
+import AulaEventsService from './aula-events.service';
 
 const AULA_INCLUDE = [
   {
@@ -155,12 +156,14 @@ export default class AulaService {
     const aula = await AulaService.requireById(id, true);
     return serializeAula(aula);
   }
-  public static async create(payload: AulaPayload) {
+    public static async create(payload: AulaPayload) {
     await AulaService.ensureProfessor(payload.professorId);
 
     const aula = await Aula.create(AulaService.buildPayload(payload));
 
     await CacheService.invalidate('aulas');
+
+    await AulaEventsService.publishCreated(aula.id, aula.professorId);
 
     return AulaService.findById(aula.id);
   }

@@ -16,3 +16,12 @@ redisClient.on('ready', () => {
 redisClient.on('error', (error: Error) => {
   console.warn('[Redis] Falha de conexão:', error.message);
 });
+export const redisSubscriber = redisClient.duplicate();
+
+redisSubscriber.on('ready', () => {
+  console.info('[Redis Subscriber] Conexão pronta para uso.');
+});
+
+redisSubscriber.on('error', (error: Error) => {
+  console.warn('[Redis Subscriber] Falha de conexão:', error.message);
+});
