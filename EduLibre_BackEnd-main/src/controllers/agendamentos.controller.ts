@@ -20,7 +20,10 @@ class AgendamentosController {
   });
 
   public static create = asyncHandler(async (req: Request, res: Response) => {
-    const agendamento = await AgendamentoService.create(req.body);
+    const agendamento = await AgendamentoService.create(
+      req.body,
+      requireAuthUser(req).id,
+    );
     res.status(201).json(agendamento);
   });
 
@@ -28,12 +31,16 @@ class AgendamentosController {
     const agendamento = await AgendamentoService.update(
       Number(req.params.id),
       req.body,
+      requireAuthUser(req).id,
     );
     res.status(200).json(agendamento);
   });
 
   public static remove = asyncHandler(async (req: Request, res: Response) => {
-    await AgendamentoService.remove(Number(req.params.id));
+    await AgendamentoService.remove(
+      Number(req.params.id),
+      requireAuthUser(req).id,
+    );
     res.status(204).send();
   });
 

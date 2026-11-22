@@ -78,20 +78,39 @@ export default class AgendamentoService {
     return agendamento.toJSON();
   }
 
-  public static async create(payload: AgendamentoPayload) {
-    await AgendamentoService.ensureRelations(payload);
+  public static async create(payload: AgendamentoPayload, requesterUserId: number) {
+    const ownedPayload = {
+      ...payload,
+      alunoId: Number(requesterUserId),
+    };
+    await AgendamentoService.ensureRelations(ownedPayload);
     const agendamento = await Agendamento.create({
-      ...AgendamentoService.buildPayload(payload),
+      ...AgendamentoService.buildPayload(ownedPayload),
       bookingStatus: 'pendente',
     });
     await CacheService.invalidate('aulas');
     return AgendamentoService.findById(agendamento.id);
   }
 
-  public static async update(id: number, payload: AgendamentoPayload) {
-    await AgendamentoService.ensureRelations(payload);
+  public static async update(
+    id: number,
+    payload: AgendamentoPayload,
+    requesterUserId: number,
+  ) {
     const agendamento = await AgendamentoService.requireById(id);
-    await agendamento.update(AgendamentoService.buildPayload(payload));
+    if (agendamento.alunoId !== requesterUserId) {
+      throw new HttpError(
+        403,
+        'Somente o aluno dono do agendamento pode alterá-lo.',
+      );
+    }
+
+    const ownedPayload = {
+      ...payload,
+      alunoId: Number(requesterUserId),
+    };
+    await AgendamentoService.ensureRelations(ownedPayload);
+    await agendamento.update(AgendamentoService.buildPayload(ownedPayload));
     await CacheService.invalidate('aulas');
     return AgendamentoService.findById(agendamento.id);
   }
@@ -151,12 +170,18 @@ export default class AgendamentoService {
     return AgendamentoService.findById(id);
   }
 
-  public static async remove(id: number) {
-  const agendamento = await AgendamentoService.requireById(id);
+  public static async remove(id: number, requesterUserId: number) {
+    const agendamento = await AgendamentoService.requireById(id);
+    if (agendamento.alunoId !== requesterUserId) {
+      throw new HttpError(
+        403,
+        'Somente o aluno dono do agendamento pode excluí-lo.',
+      );
+    }
 
-  await agendamento.destroy();
-  await CacheService.invalidate('aulas');
-}
+    await agendamento.destroy();
+    await CacheService.invalidate('aulas');
+  }
 
   private static buildWhere(filters: AgendamentoFilters) {
     return {

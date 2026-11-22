@@ -81,7 +81,7 @@ describe('Invalidação do cache de agendamentos', () => {
       expect(CacheService.invalidate).not.toHaveBeenCalled();
     });
 
-  await AgendamentoService.remove(1);
+  await AgendamentoService.remove(1, 10);
 
   expect(destroy).toHaveBeenCalledTimes(1);
   expect(CacheService.invalidate).toHaveBeenCalledTimes(1);
@@ -94,9 +94,21 @@ test('não invalida quando a exclusão falha', async () => {
   );
 
   await expect(
-    AgendamentoService.remove(1),
+    AgendamentoService.remove(1, 10),
   ).rejects.toThrow('Falha ao excluir');
 
+  expect(CacheService.invalidate).not.toHaveBeenCalled();
+});
+
+test('não permite que outro usuário exclua o agendamento', async () => {
+  const destroy = jest.spyOn(agendamento, 'destroy')
+    .mockResolvedValue(undefined);
+
+  await expect(
+    AgendamentoService.remove(1, 99),
+  ).rejects.toMatchObject({ statusCode: 403 });
+
+  expect(destroy).not.toHaveBeenCalled();
   expect(CacheService.invalidate).not.toHaveBeenCalled();
 });
 describe('criação e alteração', () => {
@@ -137,7 +149,7 @@ describe('criação e alteração', () => {
         return agendamento;
       });
 
-    await AgendamentoService.create(payload);
+    await AgendamentoService.create(payload, 10);
 
     expect(create).toHaveBeenCalledWith({
       alunoId: 10,
@@ -156,10 +168,28 @@ describe('criação e alteração', () => {
     );
 
     await expect(
-      AgendamentoService.create(payload),
+      AgendamentoService.create(payload, 10),
     ).rejects.toThrow('Falha ao criar');
 
     expect(CacheService.invalidate).not.toHaveBeenCalled();
+  });
+
+  test('ignora alunoId enviado pelo cliente na criação', async () => {
+    const create = jest
+      .spyOn(Agendamento, 'create')
+      .mockResolvedValue(agendamento);
+
+    await AgendamentoService.create(
+      { ...payload, alunoId: 99 },
+      10,
+    );
+
+    expect(create).toHaveBeenCalledWith({
+      alunoId: 10,
+      aulaId: 2,
+      data: new Date(payload.data),
+      bookingStatus: 'pendente',
+    });
   });
   test('invalida depois de alterar o agendamento', async () => {
   const update = jest
@@ -169,7 +199,7 @@ describe('criação e alteração', () => {
       return agendamento;
     });
 
-  await AgendamentoService.update(1, payload);
+  await AgendamentoService.update(1, payload, 10);
 
   expect(update).toHaveBeenCalledWith({
     alunoId: 10,
@@ -187,9 +217,21 @@ test('não invalida quando a alteração falha', async () => {
   );
 
   await expect(
-    AgendamentoService.update(1, payload),
+    AgendamentoService.update(1, payload, 10),
   ).rejects.toThrow('Falha ao alterar');
 
+  expect(CacheService.invalidate).not.toHaveBeenCalled();
+});
+
+test('não permite que outro usuário altere o agendamento', async () => {
+  const update = jest.spyOn(agendamento, 'update')
+    .mockResolvedValue(agendamento);
+
+  await expect(
+    AgendamentoService.update(1, payload, 99),
+  ).rejects.toMatchObject({ statusCode: 403 });
+
+  expect(update).not.toHaveBeenCalled();
   expect(CacheService.invalidate).not.toHaveBeenCalled();
 });
 });
