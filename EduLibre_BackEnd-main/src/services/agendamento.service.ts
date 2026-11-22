@@ -8,7 +8,11 @@ import User from '../models/User';
 import Avaliacao from '../models/Avaliacao';
 import HttpError from '../utils/http-error';
 import { buildPage, getPageRequest } from '../utils/pagination';
-import { ensureAdult, validateDate } from '../utils/validators';
+import {
+  ensureAdult,
+  validateFutureDate,
+  validatePositiveNumber,
+} from '../utils/validators';
 import CacheService from './cache.service';
 
 const AGENDAMENTO_INCLUDE = [
@@ -191,10 +195,13 @@ export default class AgendamentoService {
   }
 
   private static buildPayload(payload: AgendamentoPayload) {
+    const aulaId = validatePositiveNumber(payload.aulaId, 'Aula');
+    const alunoId = validatePositiveNumber(payload.alunoId, 'Aluno');
+
     return {
-      alunoId: Number(payload.alunoId),
-      aulaId: Number(payload.aulaId),
-      data: validateDate(payload.data),
+      alunoId,
+      aulaId,
+      data: validateFutureDate(payload.data),
     };
   }
 

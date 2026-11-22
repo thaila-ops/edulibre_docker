@@ -115,7 +115,7 @@ describe('criação e alteração', () => {
   const payload = {
     alunoId: 10,
     aulaId: 2,
-    data: '2026-11-20T14:00:00Z',
+    data: '2999-11-20T14:00:00Z',
   };
 
   beforeEach(() => {
