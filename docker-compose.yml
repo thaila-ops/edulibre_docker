@@ -60,12 +60,30 @@ services:
       database:
         condition: service_healthy
 
+  media_optimization:
+    build:
+      context: ./media_optimization_service
+      dockerfile: Dockerfile
+    container_name: media_optimization_service
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+    networks:
+      - internal_network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/health >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
   frontend:
     build:
       context: ./EduLibre_FrontEnd-main
       dockerfile: Dockerfile
       args:
         REACT_APP_API_URL: https://edulibre.local/api
+        REACT_APP_MEDIA_API_URL: https://edulibre.local/media
     container_name: frontend_service
     restart: "no"
     volumes:
@@ -91,6 +109,7 @@ services:
     depends_on:
       - frontend
       - backend
+      - media_optimization
 
 volumes:
   mysql_data:
