@@ -5,6 +5,8 @@ import {
   validateEmail,
   validatePassword,
   validateRole,
+  validateFutureDate,
+  validatePositiveNumber,
 } from '../utils/validators';
 
 describe('Validators', () => {
@@ -42,6 +44,22 @@ describe('Validators', () => {
   test('requires birth date before adult actions', () => {
     expect(() => ensureAdult(null, 'comprar aulas')).toThrow(
       'Informe a data de nascimento antes de comprar aulas.',
+    );
+  });
+
+  test('rejects agendamento dates in the past', () => {
+    expect(() => validateFutureDate('2020-01-01T10:00:00Z')).toThrow(
+      'A data do agendamento não pode estar no passado.',
+    );
+  });
+
+  test('accepts future agendamento dates', () => {
+    expect(() => validateFutureDate('2999-01-01T10:00:00Z')).not.toThrow();
+  });
+
+  test('rejects invalid positive identifiers', () => {
+    expect(() => validatePositiveNumber(0, 'Aula')).toThrow(
+      'Aula deve ser maior que zero.',
     );
   });
 });

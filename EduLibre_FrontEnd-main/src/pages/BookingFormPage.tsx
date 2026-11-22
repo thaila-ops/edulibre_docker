@@ -19,7 +19,9 @@ function BookingFormPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchLessons({ page: 1, pageSize: 50 }).then((response) => setLessons(response.data));
+    fetchLessons({ page: 1, pageSize: 50 })
+      .then((response) => setLessons(response.data))
+      .catch((requestError) => setError(getErrorMessage(requestError)));
     if (user) {
       setForm((current) => ({ ...current, alunoId: String(user.id) }));
     }
@@ -47,6 +49,28 @@ function BookingFormPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (Number(form.aulaId) <= 0) {
+      setError('Selecione uma aula.');
+      return;
+    }
+
+    if (!form.data) {
+      setError('Informe a data e hora do agendamento.');
+      return;
+    }
+
+    const parsedDate = new Date(form.data);
+    if (Number.isNaN(parsedDate.getTime())) {
+      setError('Informe uma data e hora válidas.');
+      return;
+    }
+
+    if (parsedDate.getTime() < Date.now()) {
+      setError('A data do agendamento não pode estar no passado.');
+      return;
+    }
+
     try {
       const payload = {
         alunoId: Number(form.alunoId),

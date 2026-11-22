@@ -61,6 +61,14 @@ export function validateDate(value: string) {
   return date;
 }
 
+export function validateFutureDate(value: string) {
+  const date = validateDate(value);
+  if (date.getTime() < Date.now()) {
+    throw new HttpError(400, 'A data do agendamento não pode estar no passado.');
+  }
+  return date;
+}
+
 export function validateBirthDate(value: string | undefined) {
   const requiredValue = requireText(value, 'Data de nascimento');
   const date = validateDate(requiredValue);

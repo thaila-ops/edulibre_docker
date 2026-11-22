@@ -82,7 +82,7 @@ function DashboardPage() {
             Abrir Minhas aulas
           </Link>
         </div>
-        {!lessons.length ? (
+        {!lessons.length && !error ? (
           <p className="muted">Você não tem aulas à venda.</p>
         ) : null}
         <div className="teachers_grid">
@@ -98,6 +98,9 @@ function DashboardPage() {
 
       <section className="teachers">
         <h2>Meus agendamentos como aluno</h2>
+        {!bookings.length && !error ? (
+          <p className="muted">Você ainda não possui agendamentos.</p>
+        ) : null}
         <div className="teachers_grid">
           {bookings.map((booking) => (
             <BookingSummaryCard key={booking.id} booking={booking} />

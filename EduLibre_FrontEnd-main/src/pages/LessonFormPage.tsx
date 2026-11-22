@@ -22,6 +22,7 @@ function LessonFormPage() {
   });
 
   const [image, setImage] = useState<File | null>(null);
+  const [removeImage, setRemoveImage] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -47,6 +48,7 @@ function LessonFormPage() {
   function setSelectedImage(file: File | null) {
     setError('');
     setImage(file);
+    if (file) setRemoveImage(false);
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -62,6 +64,7 @@ function LessonFormPage() {
         professorId: user.id,
         image,
         imageUrl: form.imageUrl,
+        removeImage,
       };
 
       if (isEditing && id) {
@@ -107,6 +110,10 @@ function LessonFormPage() {
             currentImageUrl={form.imageUrl}
             onChange={setSelectedImage}
             onError={setError}
+            onRemove={() => {
+              setRemoveImage(true);
+              setForm((current) => ({ ...current, imageUrl: '' }));
+            }}
           />
 
           <label className="field field-wide">

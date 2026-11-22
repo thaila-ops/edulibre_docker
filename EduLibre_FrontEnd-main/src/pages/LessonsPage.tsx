@@ -44,6 +44,7 @@ function LessonsPage() {
         items={items}
         editBasePath="/minhas-aulas"
         onDelete={handleDelete}
+        emptyMessage={error || 'Você ainda não possui aulas.'}
         columns={[
           { key: 'materia', label: 'Matéria', render: (item) => item.materia },
           {

@@ -1,6 +1,7 @@
 import type { PaginatedResponse, User } from '../types';
 import api from './api';
 import type { PaginationParams } from './types';
+import { optimizeImageFile } from '../utils/imageUpload';
 
 export async function fetchUsers(params: PaginationParams) {
   const response = await api.get<PaginatedResponse<User>>('/usuarios', {
@@ -33,6 +34,7 @@ type UpdateUserPayload = {
   avatar?: File | null;
   avatarUrl?: string;
   bio?: string;
+  removeAvatar?: boolean;
 };
 
 export async function updateUser(id: string, payload: UpdateUserPayload) {
@@ -48,9 +50,14 @@ export async function updateUser(id: string, payload: UpdateUserPayload) {
   }
 
   if (payload.avatar) {
-    formData.append('avatar', payload.avatar);
+    const optimizedAvatar = await optimizeImageFile(payload.avatar);
+    formData.append('avatar', optimizedAvatar);
   } else if (payload.avatarUrl) {
     formData.append('avatarUrl', payload.avatarUrl);
+  }
+
+  if (payload.removeAvatar) {
+    formData.append('removeAvatar', 'true');
   }
 
   const response = await api.put<User>(`/usuarios/${id}`, formData, {

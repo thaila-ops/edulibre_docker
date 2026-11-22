@@ -1,6 +1,7 @@
 import type { Lesson, PaginatedResponse } from '../types';
 import api from './api';
 import type { PaginationParams } from './types';
+import { optimizeImageFile } from '../utils/imageUpload';
 
 export async function fetchLessons(params: PaginationParams) {
   const response = await api.get<PaginatedResponse<Lesson>>('/aulas', {
@@ -26,6 +27,7 @@ type LessonPayload = {
   professorId: number;
   image?: File | null;
   imageUrl?: string;
+  removeImage?: boolean;
 };
 
 function lessonPayloadToFormData(payload: LessonPayload) {
@@ -42,13 +44,21 @@ function lessonPayloadToFormData(payload: LessonPayload) {
     formData.append('imageUrl', payload.imageUrl);
   }
 
+  if (payload.removeImage) {
+    formData.append('removeImage', 'true');
+  }
+
   return formData;
 }
 
 export async function createLesson(payload: LessonPayload) {
+  const optimizedImage = payload.image
+    ? await optimizeImageFile(payload.image)
+    : null;
+
   const response = await api.post<Lesson>(
     '/aulas',
-    lessonPayloadToFormData(payload),
+    lessonPayloadToFormData({ ...payload, image: optimizedImage }),
     {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -60,9 +70,13 @@ export async function createLesson(payload: LessonPayload) {
 }
 
 export async function updateLesson(id: string, payload: LessonPayload) {
+  const optimizedImage = payload.image
+    ? await optimizeImageFile(payload.image)
+    : null;
+
   const response = await api.put<Lesson>(
     `/aulas/${id}`,
-    lessonPayloadToFormData(payload),
+    lessonPayloadToFormData({ ...payload, image: optimizedImage }),
     {
       headers: {
         'Content-Type': 'multipart/form-data',

@@ -49,7 +49,9 @@ class UsersController {
 
     const avatarUrl = req.file
       ? `/uploads/${req.file.filename}`
-      : req.body.avatarUrl;
+      : req.body.removeAvatar === 'true'
+        ? null
+        : req.body.avatarUrl;
 
     const user = await UserService.update(targetUserId, {
       ...req.body,

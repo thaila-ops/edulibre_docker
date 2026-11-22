@@ -55,7 +55,7 @@ function ReceivedBookingsPage() {
       <Table
         headers={['Aula', 'Aluno', 'Data', 'Status', 'Pagamento', 'Ações']}
         isEmpty={!items.length}
-        emptyMessage="Você ainda não recebeu agendamentos."
+        emptyMessage={error || 'Você ainda não recebeu agendamentos.'}
       >
         {items.map((item) => (
           <tr key={item.id}>

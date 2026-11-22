@@ -13,6 +13,7 @@ type Props<T extends { id: number }> = {
   items: T[];
   editBasePath: string;
   onDelete: (id: number) => void;
+  emptyMessage?: string;
 };
 
 function DataTable<T extends { id: number }>({
@@ -20,9 +21,14 @@ function DataTable<T extends { id: number }>({
   items,
   editBasePath,
   onDelete,
+  emptyMessage,
 }: Props<T>) {
   return (
-    <Table headers={[...columns.map((column) => column.label), 'Ações']}>
+    <Table
+      headers={[...columns.map((column) => column.label), 'Ações']}
+      isEmpty={items.length === 0}
+      emptyMessage={emptyMessage}
+    >
       {items.map((item) => (
         <tr key={item.id}>
           {columns.map((column) => (

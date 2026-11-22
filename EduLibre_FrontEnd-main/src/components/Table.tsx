@@ -28,7 +28,9 @@ export default function Table({
         <tbody>
           {isEmpty ? (
             <tr>
-              <td colSpan={headers.length}>{emptyMessage}</td>
+              <td colSpan={headers.length}>
+                {emptyMessage || 'Nenhum resultado encontrado.'}
+              </td>
             </tr>
           ) : (
             children

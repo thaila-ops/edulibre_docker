@@ -8,7 +8,11 @@ import User from '../models/User';
 import Avaliacao from '../models/Avaliacao';
 import HttpError from '../utils/http-error';
 import { buildPage, getPageRequest } from '../utils/pagination';
-import { ensureAdult, validateDate } from '../utils/validators';
+import {
+  ensureAdult,
+  validateFutureDate,
+  validatePositiveNumber,
+} from '../utils/validators';
 import CacheService from './cache.service';
 
 const AGENDAMENTO_INCLUDE = [
@@ -78,20 +82,39 @@ export default class AgendamentoService {
     return agendamento.toJSON();
   }
 
-  public static async create(payload: AgendamentoPayload) {
-    await AgendamentoService.ensureRelations(payload);
+  public static async create(payload: AgendamentoPayload, requesterUserId: number) {
+    const ownedPayload = {
+      ...payload,
+      alunoId: Number(requesterUserId),
+    };
+    await AgendamentoService.ensureRelations(ownedPayload);
     const agendamento = await Agendamento.create({
-      ...AgendamentoService.buildPayload(payload),
+      ...AgendamentoService.buildPayload(ownedPayload),
       bookingStatus: 'pendente',
     });
     await CacheService.invalidate('aulas');
     return AgendamentoService.findById(agendamento.id);
   }
 
-  public static async update(id: number, payload: AgendamentoPayload) {
-    await AgendamentoService.ensureRelations(payload);
+  public static async update(
+    id: number,
+    payload: AgendamentoPayload,
+    requesterUserId: number,
+  ) {
     const agendamento = await AgendamentoService.requireById(id);
-    await agendamento.update(AgendamentoService.buildPayload(payload));
+    if (agendamento.alunoId !== requesterUserId) {
+      throw new HttpError(
+        403,
+        'Somente o aluno dono do agendamento pode alterá-lo.',
+      );
+    }
+
+    const ownedPayload = {
+      ...payload,
+      alunoId: Number(requesterUserId),
+    };
+    await AgendamentoService.ensureRelations(ownedPayload);
+    await agendamento.update(AgendamentoService.buildPayload(ownedPayload));
     await CacheService.invalidate('aulas');
     return AgendamentoService.findById(agendamento.id);
   }
@@ -151,12 +174,18 @@ export default class AgendamentoService {
     return AgendamentoService.findById(id);
   }
 
-  public static async remove(id: number) {
-  const agendamento = await AgendamentoService.requireById(id);
+  public static async remove(id: number, requesterUserId: number) {
+    const agendamento = await AgendamentoService.requireById(id);
+    if (agendamento.alunoId !== requesterUserId) {
+      throw new HttpError(
+        403,
+        'Somente o aluno dono do agendamento pode excluí-lo.',
+      );
+    }
 
-  await agendamento.destroy();
-  await CacheService.invalidate('aulas');
-}
+    await agendamento.destroy();
+    await CacheService.invalidate('aulas');
+  }
 
   private static buildWhere(filters: AgendamentoFilters) {
     return {
@@ -166,10 +195,13 @@ export default class AgendamentoService {
   }
 
   private static buildPayload(payload: AgendamentoPayload) {
+    const aulaId = validatePositiveNumber(payload.aulaId, 'Aula');
+    const alunoId = validatePositiveNumber(payload.alunoId, 'Aluno');
+
     return {
-      alunoId: Number(payload.alunoId),
-      aulaId: Number(payload.aulaId),
-      data: validateDate(payload.data),
+      alunoId,
+      aulaId,
+      data: validateFutureDate(payload.data),
     };
   }
 
