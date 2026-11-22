@@ -62,7 +62,7 @@ function BookingsPage() {
           'Ações',
         ]}
         isEmpty={!items.length}
-        emptyMessage="Você ainda não possui agendamentos."
+        emptyMessage={error || 'Você ainda não possui agendamentos.'}
       >
         {items.map((item) => (
           <tr key={item.id}>
