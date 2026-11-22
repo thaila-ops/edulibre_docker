@@ -5,8 +5,6 @@ import RequestBufferService, {
 const DEFAULT_BATCH_SIZE = 10;
 const DEFAULT_INTERVAL_MS = 5000;
 const DEFAULT_REQUEST_TIMEOUT_MS = 3000;
-const MAX_ATTEMPTS = 5;
-
 type WorkerOptions = {
   batchSize?: number;
   intervalMs?: number;
@@ -96,15 +94,6 @@ export default class BufferWorkerService {
     let processed = 0;
 
     for (const request of requests) {
-      if (request.attempts >= MAX_ATTEMPTS) {
-        await RequestBufferService.remove(request.id);
-        console.warn(
-          `[Buffer Worker] DESCARTADO: id=${request.id}; ` +
-            `tentativas=${request.attempts}`,
-        );
-        continue;
-      }
-
       const success = await BufferWorkerService.processRequest(
         request,
         targetUrls,

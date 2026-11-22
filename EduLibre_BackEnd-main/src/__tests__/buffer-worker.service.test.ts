@@ -76,16 +76,21 @@ describe('BufferWorkerService', () => {
     );
   });
 
-  test('descarta uma requisição após o limite de tentativas', async () => {
+  test('mantém uma requisição mesmo após tentativas anteriores', async () => {
     jest.mocked(RequestBufferService.peek).mockResolvedValue([
       { ...successfulRequest, attempts: 5 },
     ]);
-    jest.mocked(RequestBufferService.remove).mockResolvedValue(true);
+    jest.mocked(RequestBufferService.remove).mockResolvedValue(false);
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 503,
+    });
+    jest.mocked(RequestBufferService.markAttempt).mockResolvedValue(true);
 
     const processed = await BufferWorkerService.flushOnce();
 
     expect(processed).toBe(0);
-    expect(RequestBufferService.remove).toHaveBeenCalledWith(
+    expect(RequestBufferService.markAttempt).toHaveBeenCalledWith(
       'request-success',
     );
   });
