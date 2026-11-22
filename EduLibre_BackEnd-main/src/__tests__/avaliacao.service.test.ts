@@ -57,7 +57,7 @@ jest.spyOn(Aula, 'findByPk').mockResolvedValue(
       return avaliacao;
     });
 
-    const resultado = await AvaliacaoService.create(payload);
+    const resultado = await AvaliacaoService.create(payload, 1);
 
     expect(resultado).toBe(avaliacao);
     expect(CacheService.invalidate).toHaveBeenCalledTimes(1);
@@ -70,7 +70,7 @@ jest.spyOn(Aula, 'findByPk').mockResolvedValue(
     );
 
     await expect(
-      AvaliacaoService.create(payload),
+      AvaliacaoService.create(payload, 1),
     ).rejects.toThrow('Falha ao salvar');
 
     expect(CacheService.invalidate).not.toHaveBeenCalled();

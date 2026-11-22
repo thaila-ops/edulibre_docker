@@ -7,15 +7,18 @@ import { requireText, validateRating } from '../utils/validators';
 import CacheService from './cache.service';
 
 export default class AvaliacaoService {
-  public static async create(payload: AvaliacaoPayload) {
-    const aluno = await User.findByPk(payload.alunoId);
+  public static async create(
+    payload: AvaliacaoPayload,
+    requesterUserId: number,
+  ) {
+    const aluno = await User.findByPk(requesterUserId);
     if (!aluno) throw new HttpError(400, 'Utilizador inválido.');
     const aula = await Aula.findByPk(payload.aulaId);
     if (!aula) throw new HttpError(404, 'Aula não encontrada.');
 
     const avaliacao = await Avaliacao.create({
       aulaId: payload.aulaId,
-      alunoId: payload.alunoId,
+      alunoId: requesterUserId,
       nota: validateRating(payload.nota),
       comentario: payload.comentario
         ? requireText(payload.comentario, 'Comentário')
