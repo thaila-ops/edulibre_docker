@@ -19,7 +19,9 @@ function BookingFormPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchLessons({ page: 1, pageSize: 50 }).then((response) => setLessons(response.data));
+    fetchLessons({ page: 1, pageSize: 50 })
+      .then((response) => setLessons(response.data))
+      .catch((requestError) => setError(getErrorMessage(requestError)));
     if (user) {
       setForm((current) => ({ ...current, alunoId: String(user.id) }));
     }

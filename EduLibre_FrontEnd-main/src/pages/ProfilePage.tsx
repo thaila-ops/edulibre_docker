@@ -3,14 +3,19 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchLessons } from '../services/lessons';
 import { Lesson } from '../types';
+import Feedback from '../components/Feedback';
+import { getErrorMessage } from '../utils/validation';
 
 function ProfilePage() {
   const { user } = useAuth();
   const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!user) return;
-    fetchLessons({ page: 1, pageSize: 50, professorId: user.id }).then((response) => setLessons(response.data));
+    fetchLessons({ page: 1, pageSize: 50, professorId: user.id })
+      .then((response) => setLessons(response.data))
+      .catch((requestError) => setError(getErrorMessage(requestError)));
   }, [user]);
 
   if (!user) return null;
@@ -23,6 +28,7 @@ function ProfilePage() {
   return (
     <main className="marketing-shell">
       <div className="form-card">
+        {error ? <Feedback message={error} /> : null}
         {user.avatarUrl ? <img className="teacher_img teacher_photo" src={user.avatarUrl} alt={user.name} /> : <div className="teacher_img"></div>}
         <p className="eyebrow">Meu perfil</p>
         <h2>{user.name}</h2>

@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchNotifications, markNotificationAsRead } from '../services/notifications';
 import { Notification } from '../types';
+import { getErrorMessage } from '../utils/validation';
 
 function NotificationBell() {
   const { token } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!token) {
@@ -16,7 +18,10 @@ function NotificationBell() {
 
     fetchNotifications()
       .then(setNotifications)
-      .catch(() => setNotifications([]));
+      .catch((requestError) => {
+        setNotifications([]);
+        setError(getErrorMessage(requestError));
+      });
   }, [token]);
 
   const unreadCount = notifications.filter(
@@ -35,7 +40,8 @@ function NotificationBell() {
             item.id === updatedNotification.id ? updatedNotification : item,
           ),
         );
-      } catch {
+      } catch (requestError) {
+        setError(getErrorMessage(requestError));
         return;
       }
     }
@@ -62,7 +68,9 @@ function NotificationBell() {
           <strong>Notificações</strong>
 
           {notifications.length === 0 ? (
-            <p className="notification-empty">Você não possui notificações.</p>
+            <p className="notification-empty">
+              {error || 'Você não possui notificações.'}
+            </p>
           ) : (
             <ul className="notification-list">
               {notifications.map((notification) => (

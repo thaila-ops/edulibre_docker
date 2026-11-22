@@ -1,4 +1,5 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import axios from 'axios';
 import { fetchMe, loginRequest } from '../services/auth';
 import { clearSession, getStoredToken, getStoredUser, saveSession } from '../services/storage';
 import { User } from '../types';
@@ -21,7 +22,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!token) return setLoading(false);
-    fetchMe().then(setUser).catch(handleLogout).finally(() => setLoading(false));
+    fetchMe()
+      .then(setUser)
+      .catch((error) => {
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          handleLogout();
+        }
+      })
+      .finally(() => setLoading(false));
   }, [token]);
 
   async function login(email: string, password: string) {
