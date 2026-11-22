@@ -77,6 +77,23 @@ services:
       retries: 5
       start_period: 10s
 
+  pagamento:
+    build:
+      context: ./pagamento-service
+      dockerfile: Dockerfile
+    container_name: pagamento_service
+    restart: unless-stopped
+    environment:
+      PORT: 3002
+    networks:
+      - internal_network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3002/health >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
   frontend:
     build:
       context: ./EduLibre_FrontEnd-main
@@ -110,6 +127,7 @@ services:
       - frontend
       - backend
       - media_optimization
+      - pagamento
 
 volumes:
   mysql_data:
