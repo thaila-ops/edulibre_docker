@@ -111,7 +111,12 @@ export default class RequestBufferService {
         .lRange(BUFFER_KEY, 0, -1);
 
       for (const raw of rawRequests) {
-        const request = JSON.parse(raw) as BufferedRequest;
+        let request: BufferedRequest;
+        try {
+          request = JSON.parse(raw) as BufferedRequest;
+        } catch {
+          continue;
+        }
         if (request.id === requestId) {
           await redisClient
             .withCommandOptions({ timeout: COMMAND_TIMEOUT_MS })
@@ -123,6 +128,38 @@ export default class RequestBufferService {
     } catch (error) {
       console.warn(
         '[Buffer] Falha ao remover requisição:',
+        error instanceof Error ? error.message : 'Erro desconhecido',
+      );
+      return false;
+    }
+  }
+
+  public static async markAttempt(requestId: string): Promise<boolean> {
+    if (!redisClient.isReady) return false;
+
+    try {
+      const rawRequests = await redisClient
+        .withCommandOptions({ timeout: COMMAND_TIMEOUT_MS })
+        .lRange(BUFFER_KEY, 0, -1);
+
+      for (let index = 0; index < rawRequests.length; index += 1) {
+        const raw = rawRequests[index];
+        const request = JSON.parse(raw) as BufferedRequest;
+        if (request.id === requestId) {
+          const updated = {
+            ...request,
+            attempts: request.attempts + 1,
+          };
+          await redisClient
+            .withCommandOptions({ timeout: COMMAND_TIMEOUT_MS })
+            .lSet(BUFFER_KEY, index, JSON.stringify(updated));
+          return true;
+        }
+      }
+      return false;
+    } catch (error) {
+      console.warn(
+        '[Buffer] Falha ao atualizar tentativas:',
         error instanceof Error ? error.message : 'Erro desconhecido',
       );
       return false;

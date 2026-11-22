@@ -94,4 +94,25 @@ describe('RequestBufferService', () => {
       raw,
     );
   });
+
+  test('ignora entradas inválidas ao remover uma requisição', async () => {
+    const raw = JSON.stringify({
+      id: 'request-valid',
+      target: 'pagamento',
+      method: 'GET',
+      path: '/health',
+      body: null,
+      createdAt: '2026-11-22T00:00:00.000Z',
+      attempts: 0,
+    });
+    mockRange.mockResolvedValue(['entrada-invalida', raw]);
+    mockRemove.mockResolvedValue(1);
+
+    await expect(RequestBufferService.remove('request-valid')).resolves.toBe(true);
+    expect(mockRemove).toHaveBeenCalledWith(
+      RequestBufferService.getKey(),
+      1,
+      raw,
+    );
+  });
 });

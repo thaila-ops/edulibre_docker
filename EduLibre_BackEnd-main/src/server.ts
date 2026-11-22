@@ -14,6 +14,7 @@ import './models/UserRoleAssignment';
 import RbacService from './services/rbac.service';
 import { redisClient } from './config/redis';
 import { startAulaCriadaSubscriber } from './events/aula-criada.subscriber';
+import BufferWorkerService from './services/buffer-worker.service';
 
 const port = Number(process.env.PORT) || 3001;
 
@@ -41,3 +42,5 @@ void startAulaCriadaSubscriber().catch((error: unknown) => {
     error instanceof Error ? error.message : 'Erro desconhecido',
   );
 });
+
+BufferWorkerService.start();
