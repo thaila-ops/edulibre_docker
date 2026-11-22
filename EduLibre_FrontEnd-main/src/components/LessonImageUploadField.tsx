@@ -11,6 +11,7 @@ type Props = {
   currentImageUrl?: string | null;
   onChange: (file: File | null) => void;
   onError: (message: string) => void;
+  onRemove?: () => void;
 };
 
 function LessonImageUploadField({
@@ -20,14 +21,21 @@ function LessonImageUploadField({
   currentImageUrl,
   onChange,
   onError,
+  onRemove,
 }: Props) {
   const inputId = useId();
   const [selectedFileName, setSelectedFileName] = useState('');
   const [previewUrl, setPreviewUrl] = useState<string | null>(
     currentImageUrl ?? null,
   );
+  const [removed, setRemoved] = useState(false);
 
   useEffect(() => {
+    if (removed) {
+      setPreviewUrl(null);
+      return;
+    }
+
     if (!value) {
       setPreviewUrl(currentImageUrl ?? null);
       return;
@@ -37,7 +45,7 @@ function LessonImageUploadField({
     setPreviewUrl(localPreviewUrl);
 
     return () => URL.revokeObjectURL(localPreviewUrl);
-  }, [value, currentImageUrl]);
+  }, [value, currentImageUrl, removed]);
 
   function handleFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -58,6 +66,7 @@ function LessonImageUploadField({
 
     onError('');
     setSelectedFileName(file.name);
+    setRemoved(false);
     onChange(file);
 
     event.target.value = '';
@@ -65,7 +74,10 @@ function LessonImageUploadField({
 
   function removeImage() {
     setSelectedFileName('');
+    setRemoved(true);
+    setPreviewUrl(null);
     onChange(null);
+    onRemove?.();
   }
 
   return (

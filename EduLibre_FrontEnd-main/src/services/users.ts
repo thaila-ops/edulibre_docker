@@ -34,6 +34,7 @@ type UpdateUserPayload = {
   avatar?: File | null;
   avatarUrl?: string;
   bio?: string;
+  removeAvatar?: boolean;
 };
 
 export async function updateUser(id: string, payload: UpdateUserPayload) {
@@ -53,6 +54,10 @@ export async function updateUser(id: string, payload: UpdateUserPayload) {
     formData.append('avatar', optimizedAvatar);
   } else if (payload.avatarUrl) {
     formData.append('avatarUrl', payload.avatarUrl);
+  }
+
+  if (payload.removeAvatar) {
+    formData.append('removeAvatar', 'true');
   }
 
   const response = await api.put<User>(`/usuarios/${id}`, formData, {

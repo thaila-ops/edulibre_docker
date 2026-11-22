@@ -27,6 +27,7 @@ type LessonPayload = {
   professorId: number;
   image?: File | null;
   imageUrl?: string;
+  removeImage?: boolean;
 };
 
 function lessonPayloadToFormData(payload: LessonPayload) {
@@ -41,6 +42,10 @@ function lessonPayloadToFormData(payload: LessonPayload) {
     formData.append('image', payload.image);
   } else if (payload.imageUrl) {
     formData.append('imageUrl', payload.imageUrl);
+  }
+
+  if (payload.removeImage) {
+    formData.append('removeImage', 'true');
   }
 
   return formData;

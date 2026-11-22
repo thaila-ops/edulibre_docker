@@ -90,7 +90,9 @@ class AulasController {
 
     const imageUrl = req.file
       ? `/uploads/${req.file.filename}`
-      : (req.body.imageUrl ?? aulaAtual.imageUrl);
+      : req.body.removeImage === 'true'
+        ? null
+        : (req.body.imageUrl ?? aulaAtual.imageUrl);
 
     const aula = await AulaService.update(Number(req.params.id), {
       ...req.body,

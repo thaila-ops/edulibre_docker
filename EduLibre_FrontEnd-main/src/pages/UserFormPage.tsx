@@ -24,6 +24,7 @@ function UserFormPage() {
   });
   const [error, setError] = useState('');
   const [avatar, setAvatar] = useState<File | null>(null);
+  const [removeAvatar, setRemoveAvatar] = useState(false);
 
   useEffect(() => {
     fetchMe().then((currentUser) => {
@@ -62,6 +63,7 @@ function UserFormPage() {
         dataNascimento: form.dataNascimento,
        avatar,
         avatarUrl: form.avatarUrl,
+        removeAvatar,
         bio: form.bio,
         password: form.password || undefined,
       });
@@ -89,8 +91,13 @@ function UserFormPage() {
                 onChange={(file) => {
                   setError('');
                   setAvatar(file);
+                  if (file) setRemoveAvatar(false);
                 }}
                 onError={setError}
+                onRemove={() => {
+                  setRemoveAvatar(true);
+                  setForm((current) => ({ ...current, avatarUrl: '' }));
+                }}
 />
           <label className="field field-wide">
             <span>Biografia</span>
