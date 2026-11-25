@@ -130,13 +130,13 @@ function AdminDashboardPage() {
         {announcementError ? <Feedback message={announcementError} /> : null}
       </section>
 
-      <section className="form-card">
+      <section className="form-card moderation-panel">
         <h2>Moderar aulas</h2>
 
         {lessons.length === 0 ? (
           <p className="muted">Nenhuma aula encontrada.</p>
         ) : (
-          <div className="grid-3">
+          <div className="grid-3 moderation-grid">
             {lessons.map((lesson) => (
               <LessonModerationCard
                 key={lesson.id}

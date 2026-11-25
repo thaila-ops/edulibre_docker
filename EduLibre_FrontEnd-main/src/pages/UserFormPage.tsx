@@ -73,9 +73,9 @@ function UserFormPage() {
   }
 
   return (
-    <main className="marketing-shell">
+    <main className="marketing-shell profile-edit-page">
       <PageHeader title="Editar perfil" description="Atualize sua foto, bio, data de nascimento e senha quando quiser." />
-      <form className="form-card" onSubmit={handleSubmit}>
+      <form className="form-card profile-edit-form" onSubmit={handleSubmit}>
         <div className="form-grid">
           <FormField label="Nome" name="name" value={form.name} onChange={(value) => setField('name', value)} />
           <FormField label="E-mail" name="email" type="email" value={form.email} onChange={(value) => setField('email', value)} />

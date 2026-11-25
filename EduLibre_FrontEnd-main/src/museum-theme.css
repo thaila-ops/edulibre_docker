@@ -815,6 +815,24 @@ tbody tr:hover {
 .admin-panel > .hero-card p {
   margin: 8px 0;
 }
+
+/* Painéis de administração e perfil alinhados ao centro da área de conteúdo. */
+.moderation-panel {
+  width: min(1040px, 100%);
+  margin-inline: auto;
+}
+.moderation-grid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 340px));
+  justify-content: center;
+}
+.profile-edit-page .page-header,
+.profile-edit-form {
+  width: min(720px, 100%);
+  margin-inline: auto;
+}
+.profile-edit-page .page-header {
+  text-align: center;
+}
 .footer {
   box-shadow: none;
 }
