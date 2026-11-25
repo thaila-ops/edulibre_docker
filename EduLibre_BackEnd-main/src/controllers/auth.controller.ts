@@ -5,6 +5,7 @@ import UserService from '../services/user.service';
 import TokenService from '../services/token.service';
 import RbacService from '../services/rbac.service';
 import PasswordResetService from '../services/password-reset.service';
+import HealthService from '../services/health.service';
 
 class AuthController {
   public static health = (_req: Request, res: Response) => {
@@ -12,6 +13,11 @@ class AuthController {
       message: 'EduLivre API',
     });
   };
+
+  public static readiness = asyncHandler(async (_req: Request, res: Response) => {
+    const readiness = await HealthService.readiness();
+    res.status(readiness.healthy ? 200 : 503).json(readiness);
+  });
 
   public static login = asyncHandler(async (req, res) => {
     const user = await UserService.authenticate(

@@ -19,6 +19,9 @@ class Agendamento extends Model<
   declare data: Date;
   declare bookingStatus: CreationOptional<'pendente' | 'aceito' | 'recusado'>;
   declare paymentStatus: CreationOptional<'pendente' | 'pago'>;
+  declare paymentTransactionId: CreationOptional<string | null>;
+  declare paymentMethod: CreationOptional<'pix' | 'card' | null>;
+  declare paymentPaidAt: CreationOptional<Date | null>;
 }
 
 Agendamento.init(
@@ -45,6 +48,13 @@ Agendamento.init(
       allowNull: false,
       defaultValue: 'pendente',
     },
+    paymentTransactionId: { type: DataTypes.STRING, allowNull: true, defaultValue: null },
+    paymentMethod: {
+      type: DataTypes.ENUM('pix', 'card'),
+      allowNull: true,
+      defaultValue: null,
+    },
+    paymentPaidAt: { type: DataTypes.DATE, allowNull: true, defaultValue: null },
   },
   { sequelize, tableName: 'Agendamentos' },
 );

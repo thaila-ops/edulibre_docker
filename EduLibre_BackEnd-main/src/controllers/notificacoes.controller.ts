@@ -2,8 +2,19 @@ import { requireAuthUser } from '../utils/auth-user';
 import { Request, Response } from 'express';
 import NotificacaoService from '../services/notificacao.service';
 import asyncHandler from '../utils/async-handler';
+import RealtimeNotificationService from '../services/realtime-notification.service';
 
 class NotificacoesController {
+  public static stream = asyncHandler(async (req: Request, res: Response) => {
+    res.status(200).set({
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+    });
+    res.flushHeaders();
+    RealtimeNotificationService.connect(requireAuthUser(req).id, res);
+  });
+
   public static listarMinhas = asyncHandler(
     async (req: Request, res: Response) => {
       const notificacoes = await NotificacaoService.listarDoUsuario(

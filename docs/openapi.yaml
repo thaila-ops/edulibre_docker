@@ -1,0 +1,148 @@
+openapi: 3.0.3
+info:
+  title: EduLivre API
+  version: 1.0.0
+  description: API da plataforma de aulas particulares. Endpoints protegidos usam JWT Bearer.
+servers:
+  - url: https://edulibre.local/api
+security:
+  - bearerAuth: []
+paths:
+  /:
+    get:
+      security: []
+      summary: Health básico
+      responses:
+        '200': { description: API disponível }
+  /health/ready:
+    get:
+      security: []
+      summary: Prontidão das dependências
+      responses:
+        '200': { description: Banco, Redis e pagamento disponíveis }
+        '503': { description: Alguma dependência indisponível }
+  /login:
+    post:
+      security: []
+      summary: Autentica um usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginInput' }
+      responses:
+        '200': { description: JWT e perfil autenticado }
+        '401': { description: Credenciais inválidas }
+  /auth/password-reset/request:
+    post:
+      security: []
+      summary: Solicita código de recuperação de senha
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [email], properties: { email: { type: string, format: email } } }
+      responses:
+        '200': { description: Resposta neutra para evitar enumeração de contas }
+        '429': { description: Limite de solicitações excedido }
+  /auth/password-reset/confirm:
+    post:
+      security: []
+      summary: Redefine a senha por código OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, code, password]
+              properties:
+                email: { type: string, format: email }
+                code: { type: string, pattern: '^[0-9]{6}$' }
+                password: { type: string, format: password }
+      responses:
+        '200': { description: Senha redefinida }
+        '400': { description: Código inválido ou expirado }
+  /usuarios:
+    post:
+      security: []
+      summary: Cria uma conta
+      responses:
+        '201': { description: Usuário criado e e-mail de boas-vindas disparado }
+  /aulas:
+    get:
+      security: []
+      summary: Lista aulas com paginação e filtros
+      parameters:
+        - { name: materia, in: query, schema: { type: string } }
+        - { name: page, in: query, schema: { type: integer, minimum: 1 } }
+      responses:
+        '200': { description: Página de aulas }
+    post:
+      summary: Cria aula
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema: { type: object, properties: { materia: { type: string }, valor: { type: number }, image: { type: string, format: binary } } }
+      responses:
+        '201': { description: Aula criada }
+        '403': { description: Permissão insuficiente }
+  /agendamentos:
+    get:
+      summary: Lista agendamentos do contexto autenticado
+      responses: { '200': { description: Lista paginada } }
+    post:
+      summary: Solicita uma aula
+      responses: { '201': { description: Agendamento pendente } }
+  /agendamentos/{id}/pagar:
+    patch:
+      summary: Processa pagamento simulado de reserva aceita
+      parameters:
+        - { $ref: '#/components/parameters/Id' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [method]
+              properties:
+                method: { type: string, enum: [pix, card] }
+                cardNumber: { type: string, description: Apenas cartão de teste; não é persistido }
+                cardHolder: { type: string }
+      responses:
+        '200': { description: Agendamento pago com auditoria de transação }
+        '402': { description: Pagamento simulado recusado }
+        '503': { description: Serviço de pagamento indisponível }
+  /notificacoes/stream:
+    get:
+      summary: Abre stream SSE de notificações em tempo real
+      responses: { '200': { description: Stream text/event-stream } }
+  /admin/comunicados:
+    post:
+      summary: Envia comunicado pré-configurado aos usuários conectados
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [templateKey]
+              properties:
+                templateKey: { type: string, enum: [maintenance, instability, restored, news] }
+      responses:
+        '201': { description: Broadcast enviado }
+        '403': { description: Apenas administrador }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    Id: { name: id, in: path, required: true, schema: { type: integer } }
+  schemas:
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, format: password }

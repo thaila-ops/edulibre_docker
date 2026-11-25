@@ -13,6 +13,13 @@ router.get(
   AdminController.dashboard,
 );
 
+router.post(
+  '/admin/comunicados',
+  authMiddleware,
+  requirePermission('admin.dashboard.visualizar'),
+  AdminController.publishAnnouncement,
+);
+
 router.get(
   '/admin/aulas',
   authMiddleware,

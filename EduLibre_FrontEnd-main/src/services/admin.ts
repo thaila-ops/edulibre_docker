@@ -1,6 +1,19 @@
 import type { AdminDashboardStats, Lesson, PaginatedResponse } from '../types';
 import api from './api';
 
+export type AnnouncementTemplateKey =
+  | 'maintenance'
+  | 'instability'
+  | 'restored'
+  | 'news';
+
+export type AnnouncementResult = {
+  templateKey: AnnouncementTemplateKey;
+  title: string;
+  message: string;
+  deliveredAt: string;
+};
+
 export async function fetchAdminDashboard() {
   const response = await api.get<AdminDashboardStats>('/admin/dashboard');
 
@@ -26,6 +39,14 @@ export async function blockLesson(id: number, motivo: string) {
 
 export async function unblockLesson(id: number) {
   const response = await api.patch<Lesson>(`/aulas/${id}/desbloquear`);
+
+  return response.data;
+}
+
+export async function publishAnnouncement(templateKey: AnnouncementTemplateKey) {
+  const response = await api.post<AnnouncementResult>('/admin/comunicados', {
+    templateKey,
+  });
 
   return response.data;
 }

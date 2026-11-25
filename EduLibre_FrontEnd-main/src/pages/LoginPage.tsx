@@ -26,7 +26,7 @@ function LoginPage() {
 
   return (
     <main className="center-shell">
-      <form className="auth-card" onSubmit={handleSubmit}>
+      <form className="auth-card login-card" onSubmit={handleSubmit}>
         <p className="eyebrow">Entrar</p>
         <h1>Entre para agendar ou vender aulas</h1>
         <FormField label="E-mail" name="email" type="email" value={email} onChange={setEmail} />

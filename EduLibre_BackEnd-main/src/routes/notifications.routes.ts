@@ -5,6 +5,12 @@ import NotificacoesController from '../controllers/notificacoes.controller';
 const router = Router();
 
 router.get(
+  '/notificacoes/stream',
+  authMiddleware,
+  NotificacoesController.stream,
+);
+
+router.get(
   '/notificacoes',
   authMiddleware,
   NotificacoesController.listarMinhas,

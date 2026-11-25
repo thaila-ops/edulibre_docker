@@ -121,6 +121,28 @@
   position: relative;
 }
 
+.notification-live {
+  position: fixed;
+  z-index: 1100;
+  top: 104px;
+  right: 28px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 18px;
+  width: min(360px, calc(100vw - 32px));
+  padding: 16px 18px;
+  border: 1px solid rgba(104, 223, 255, 0.55);
+  border-radius: 14px;
+  background: rgba(9, 22, 42, 0.94);
+  color: #fff;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.38), 0 0 24px rgba(79, 159, 255, 0.2);
+}
+
+.notification-live strong,
+.notification-live span { grid-column: 1; }
+.notification-live span { color: rgba(255, 255, 255, 0.78); font-size: .88rem; }
+.notification-live button { grid-column: 2; grid-row: 1 / span 2; border: 0; background: transparent; color: #fff; cursor: pointer; font-size: 1.3rem; }
+
 .notification-button {
   position: relative;
   border: 0;

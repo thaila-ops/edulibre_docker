@@ -1,7 +1,9 @@
 import { redisSubscriber } from '../config/redis';
 import { AULA_CRIADA_CHANNEL } from './aula-criada.event';
+import Aula from '../models/Aula';
+import RealtimeNotificationService from '../services/realtime-notification.service';
 
-function handleMessage(message: string): void {
+async function handleMessage(message: string): Promise<void> {
   try {
     const event: unknown = JSON.parse(message);
 
@@ -25,6 +27,13 @@ function handleMessage(message: string): void {
     console.info(
       `[Eventos] RECEBIDO: ${event.eventType}; ` +
         `eventId=${event.eventId}; aulaId=${event.data.aulaId}`,
+    );
+
+    const aula = await Aula.findByPk(event.data.aulaId);
+    const materia = aula?.materia ?? 'Nova aula';
+    RealtimeNotificationService.broadcast(
+      'Nova aula disponível',
+      `A aula de ${materia} acabou de ser publicada na EduLivre.`,
     );
   } catch (error) {
     console.warn(

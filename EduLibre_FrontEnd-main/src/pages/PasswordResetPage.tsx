@@ -71,7 +71,7 @@ function PasswordResetPage() {
   return (
     <main className="center-shell">
       <form
-        className="auth-card"
+        className="auth-card password-reset-card"
         onSubmit={requested ? handleConfirm : handleRequest}
       >
         <p className="eyebrow">Recuperar acesso</p>
@@ -81,13 +81,15 @@ function PasswordResetPage() {
             ? 'Digite o código enviado ao seu e-mail. Ele expira em 15 minutos.'
             : 'Informe seu e-mail e enviaremos um código de seis dígitos.'}
         </p>
-        <FormField
-          label="E-mail"
-          name="email"
-          type="email"
-          value={email}
-          onChange={setEmail}
-        />
+        {!requested ? (
+          <FormField
+            label="E-mail"
+            name="email"
+            type="email"
+            value={email}
+            onChange={setEmail}
+          />
+        ) : null}
         {requested ? (
           <>
             <FormField

@@ -22,6 +22,7 @@ const passwordResetConfirmLimiter = rateLimit({
 });
 
 router.get('/', AuthController.health);
+router.get('/health/ready', AuthController.readiness);
 
 router.post('/login', AuthController.login);
 router.post('/auth/password-reset/request', passwordResetRequestLimiter, AuthController.requestPasswordReset);

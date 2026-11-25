@@ -151,6 +151,120 @@ textarea {
   padding: 32px;
 }
 
+.password-reset-card {
+  width: min(520px, 100%);
+  margin: 32px auto;
+  padding: 28px 32px;
+}
+
+.login-card {
+  width: min(560px, 100%);
+  margin: 32px auto;
+  padding: 30px 32px;
+}
+
+.login-card h1 {
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  line-height: 1.12;
+}
+
+.password-reset-card h1 {
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  line-height: 1.1;
+}
+
+.password-reset-card .feedback {
+  margin: 0;
+}
+
+.payment-page {
+  padding-top: 132px;
+  padding-bottom: 72px;
+}
+
+.payment-heading {
+  max-width: 680px;
+  margin-bottom: 30px;
+}
+
+.payment-heading h1 {
+  margin: 8px 0;
+}
+
+.payment-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.75fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.payment-card,
+.payment-summary {
+  padding: 30px;
+  border: 1px solid rgba(212, 176, 94, 0.35);
+  background: rgba(18, 22, 18, 0.88);
+  box-shadow: 0 22px 48px rgba(0, 0, 0, 0.22);
+}
+
+.payment-card {
+  display: grid;
+  gap: 22px;
+}
+
+.payment-card h2,
+.payment-summary h2 {
+  margin: 0;
+}
+
+.payment-methods {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.payment-method {
+  display: grid;
+  gap: 5px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.payment-method span { font-size: 1.12rem; font-weight: 700; }
+.payment-method small { color: var(--muted); }
+.payment-method-active { border-color: var(--gold); background: rgba(212, 176, 94, 0.12); box-shadow: inset 0 0 0 1px rgba(212, 176, 94, 0.2); }
+
+.pix-panel {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  padding: 18px;
+  border: 1px solid rgba(102, 223, 210, 0.3);
+  background: rgba(30, 111, 100, 0.14);
+}
+
+.pix-panel p { margin-bottom: 0; color: var(--muted); }
+.pix-code { display: grid; width: 76px; height: 76px; flex: 0 0 auto; place-items: center; border: 7px double #72e1d6; background: repeating-linear-gradient(45deg, #112a29 0 5px, #21645d 5px 10px); color: #fff; font-size: .75rem; font-weight: 800; letter-spacing: .12em; }
+.payment-fields { display: grid; gap: 14px; }
+.payment-hint { margin: 0; color: var(--muted); font-size: .9rem; }
+
+.payment-summary dl { display: grid; gap: 14px; margin: 26px 0; }
+.payment-summary dl div { display: flex; justify-content: space-between; gap: 16px; color: var(--muted); }
+.payment-summary dt, .payment-summary dd { margin: 0; }
+.payment-summary dd { color: var(--text); font-weight: 600; text-align: right; }
+.payment-total { display: flex; justify-content: space-between; align-items: baseline; padding-top: 18px; border-top: 1px solid var(--line); font-size: 1.1rem; }
+.payment-total strong { color: var(--gold); font-size: 1.5rem; }
+.payment-security { margin: 22px 0 0; color: var(--muted); font-size: .86rem; }
+
+@media (max-width: 760px) {
+  .payment-page { padding-top: 112px; }
+  .payment-layout { grid-template-columns: 1fr; }
+  .payment-card, .payment-summary { padding: 22px; }
+}
+
 .table-card {
   overflow: auto;
 }
@@ -733,6 +847,42 @@ img { max-width: 100%; }
 .login-container,
 .professores-container {
   background: transparent;
+}
+
+.announcement-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.announcement-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+}
+
+.announcement-card {
+  display: grid;
+  gap: 10px;
+  min-height: 180px;
+  padding: 20px;
+  border: 1px solid rgba(129, 194, 255, 0.26);
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(22, 40, 66, 0.84), rgba(12, 24, 43, 0.88));
+}
+
+.announcement-card h3,
+.announcement-card p {
+  margin: 0;
+}
+
+.announcement-card p {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.announcement-card .secondary-button {
+  align-self: end;
+  justify-self: start;
 }
 /* GRID EXCLUSIVO DA LISTA DE AULAS */
 .grid-3.professores-grid {

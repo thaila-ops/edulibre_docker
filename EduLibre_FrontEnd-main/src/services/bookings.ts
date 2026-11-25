@@ -31,8 +31,15 @@ export async function updateBooking(
   return response.data;
 }
 
-export async function payBooking(id: number) {
-  const response = await api.patch<Booking>(`/agendamentos/${id}/pagar`);
+export async function payBooking(
+  id: number,
+  payload: {
+    method: 'pix' | 'card';
+    cardNumber?: string;
+    cardHolder?: string;
+  },
+) {
+  const response = await api.patch<Booking>(`/agendamentos/${id}/pagar`, payload);
   return response.data;
 }
 
