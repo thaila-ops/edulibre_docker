@@ -17,8 +17,58 @@ import { startAulaCriadaSubscriber } from './events/aula-criada.subscriber';
 
 const port = Number(process.env.PORT) || 3001;
 
+async function ensurePasswordResetColumns() {
+  const [rows] = await sequelize.query('SHOW COLUMNS FROM Users') as unknown as [
+    Array<{ Field: string }>,
+    unknown,
+  ];
+  const existingColumns = new Set(rows.map((row) => row.Field));
+  const missingDefinitions = [
+    !existingColumns.has('passwordResetCodeHash')
+      ? 'ADD COLUMN passwordResetCodeHash VARCHAR(255) NULL'
+      : null,
+    !existingColumns.has('passwordResetExpiresAt')
+      ? 'ADD COLUMN passwordResetExpiresAt DATETIME NULL'
+      : null,
+    !existingColumns.has('passwordResetAttempts')
+      ? 'ADD COLUMN passwordResetAttempts INT NOT NULL DEFAULT 0'
+      : null,
+  ].filter((definition): definition is string => definition !== null);
+
+  if (missingDefinitions.length > 0) {
+    await sequelize.query(`ALTER TABLE Users ${missingDefinitions.join(', ')}`);
+    console.info('[Banco] Colunas de recuperação de senha adicionadas.');
+  }
+}
+
+async function ensurePaymentAuditColumns() {
+  const [rows] = await sequelize.query('SHOW COLUMNS FROM Agendamentos') as unknown as [
+    Array<{ Field: string }>,
+    unknown,
+  ];
+  const existingColumns = new Set(rows.map((row) => row.Field));
+  const missingDefinitions = [
+    !existingColumns.has('paymentTransactionId')
+      ? 'ADD COLUMN paymentTransactionId VARCHAR(255) NULL'
+      : null,
+    !existingColumns.has('paymentMethod')
+      ? "ADD COLUMN paymentMethod ENUM('pix', 'card') NULL"
+      : null,
+    !existingColumns.has('paymentPaidAt')
+      ? 'ADD COLUMN paymentPaidAt DATETIME NULL'
+      : null,
+  ].filter((definition): definition is string => definition !== null);
+
+  if (missingDefinitions.length > 0) {
+    await sequelize.query(`ALTER TABLE Agendamentos ${missingDefinitions.join(', ')}`);
+    console.info('[Banco] Colunas de auditoria de pagamento adicionadas.');
+  }
+}
+
 async function startServer() {
   await normalizeLegacyBirthDates();
+  await ensurePasswordResetColumns();
+  await ensurePaymentAuditColumns();
   await sequelize.sync();
   await RbacService.seed();
   await RbacService.migrateLegacyUsers();

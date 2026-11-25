@@ -8,7 +8,7 @@ import BookingStatus from '../components/bookings/BookingStatus';
 import { useAuth } from '../contexts/AuthContext';
 import usePaginatedResource from '../hooks/usePaginatedResource';
 import usePagination from '../hooks/usePagination';
-import { deleteBooking, fetchBookings, payBooking } from '../services/bookings';
+import { deleteBooking, fetchBookings } from '../services/bookings';
 import { Booking } from '../types';
 import { getErrorMessage } from '../utils/validation';
 
@@ -29,17 +29,6 @@ function BookingsPage() {
       setItems((current) => current.filter((item) => item.id !== id));
     } catch (requestError) {
       setError(getErrorMessage(requestError));
-    }
-  }
-
-  async function handlePay(booking: Booking) {
-    try {
-      const updated = await payBooking(booking.id);
-      setItems((current) =>
-        current.map((item) => (item.id === booking.id ? updated : item)),
-      );
-    } catch (submitError) {
-      setError(getErrorMessage(submitError));
     }
   }
 
@@ -75,21 +64,17 @@ function BookingsPage() {
             <td>{item.paymentStatus === 'pago' ? 'Pago' : 'Pendente'}</td>
             <td className="actions">
               <Link to={`/agendamentos/${item.id}`}>Detalhes</Link>
-              <button
-                onClick={() => handlePay(item)}
-                disabled={
-                  item.paymentStatus === 'pago' ||
-                  item.bookingStatus !== 'aceito'
-                }
-              >
-                {item.paymentStatus === 'pago'
-                  ? 'Pago'
-                  : item.bookingStatus === 'aceito'
-                    ? 'Pagar'
+              {item.paymentStatus !== 'pago' && item.bookingStatus === 'aceito' ? (
+                <Link to={`/agendamentos/${item.id}/pagamento`}>Pagar</Link>
+              ) : (
+                <button disabled>
+                  {item.paymentStatus === 'pago'
+                    ? 'Pago'
                     : item.bookingStatus === 'recusado'
                       ? 'Recusado'
                       : 'Aguardando aceite'}
-              </button>
+                </button>
+              )}
               <button onClick={() => void handleDelete(item.id)}>
                 Cancelar
               </button>

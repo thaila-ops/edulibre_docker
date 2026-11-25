@@ -1,12 +1,24 @@
 import { redisSubscriber } from '../config/redis';
 import { AULA_CRIADA_CHANNEL } from '../events/aula-criada.event';
 import { startAulaCriadaSubscriber } from '../events/aula-criada.subscriber';
+import Aula from '../models/Aula';
+import RealtimeNotificationService from '../services/realtime-notification.service';
 
 jest.mock('../config/redis', () => ({
   redisSubscriber: {
     connect: jest.fn().mockResolvedValue(undefined),
     subscribe: jest.fn().mockResolvedValue(undefined),
   },
+}));
+
+jest.mock('../models/Aula', () => ({
+  __esModule: true,
+  default: { findByPk: jest.fn() },
+}));
+
+jest.mock('../services/realtime-notification.service', () => ({
+  __esModule: true,
+  default: { broadcast: jest.fn() },
 }));
 
 const subscribeMock = jest.mocked(redisSubscriber.subscribe);
@@ -16,6 +28,7 @@ describe('Consumidor de aula.criada', () => {
     jest.clearAllMocks();
     jest.spyOn(console, 'info').mockImplementation(() => {});
     jest.spyOn(console, 'warn').mockImplementation(() => {});
+    jest.mocked(Aula.findByPk).mockResolvedValue({ materia: 'Matemática' } as never);
   });
 
   afterEach(() => {
@@ -34,7 +47,7 @@ describe('Consumidor de aula.criada', () => {
 
     const handleMessage = subscribeMock.mock.calls[0][1];
 
-    handleMessage(
+    await handleMessage(
       JSON.stringify({
         eventId: 'evento-teste-1',
         eventType: 'aula.criada',
@@ -51,6 +64,10 @@ describe('Consumidor de aula.criada', () => {
       '[Eventos] RECEBIDO: aula.criada; ' +
         'eventId=evento-teste-1; aulaId=17',
     );
+    expect(RealtimeNotificationService.broadcast).toHaveBeenCalledWith(
+      'Nova aula disponível',
+      'A aula de Matemática acabou de ser publicada na EduLivre.',
+    );
   });
 
   it('ignora uma mensagem com estrutura inválida', async () => {
@@ -58,7 +75,7 @@ describe('Consumidor de aula.criada', () => {
     const handleMessage = subscribeMock.mock.calls[0][1];
     jest.mocked(console.info).mockClear();
 
-    handleMessage(
+    await handleMessage(
       JSON.stringify({ eventType: 'aula.criada' }),
       AULA_CRIADA_CHANNEL,
     );
@@ -74,9 +91,9 @@ describe('Consumidor de aula.criada', () => {
     const handleMessage = subscribeMock.mock.calls[0][1];
     jest.mocked(console.info).mockClear();
 
-    expect(() => {
-      handleMessage('isto não é JSON', AULA_CRIADA_CHANNEL);
-    }).not.toThrow();
+    await expect(
+      handleMessage('isto não é JSON', AULA_CRIADA_CHANNEL),
+    ).resolves.toBeUndefined();
 
     expect(console.warn).toHaveBeenCalledWith(
       '[Eventos] Falha ao interpretar aula.criada:',

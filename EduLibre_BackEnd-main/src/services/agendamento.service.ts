@@ -10,6 +10,7 @@ import HttpError from '../utils/http-error';
 import { buildPage, getPageRequest } from '../utils/pagination';
 import { ensureAdult, validateDate } from '../utils/validators';
 import CacheService from './cache.service';
+import PaymentClientService, { type PaymentPayload } from './payment-client.service';
 
 const AGENDAMENTO_INCLUDE = [
   {
@@ -96,7 +97,11 @@ export default class AgendamentoService {
     return AgendamentoService.findById(agendamento.id);
   }
 
-  public static async pay(id: number, payerUserId: number) {
+  public static async pay(
+    id: number,
+    payerUserId: number,
+    paymentPayload: PaymentPayload,
+  ) {
     const agendamento = await AgendamentoService.requireById(id, true);
 
     if (agendamento.alunoId !== payerUserId) {
@@ -113,12 +118,35 @@ export default class AgendamentoService {
       );
     }
 
-    const plain = agendamento.toJSON() as Agendamento & { aluno?: User };
+    const plain = agendamento.toJSON() as Agendamento & {
+      aluno?: User;
+      aula?: Aula;
+    };
     if (plain.aluno?.dataNascimento) {
       ensureAdult(new Date(plain.aluno.dataNascimento), 'comprar aulas');
     }
 
-    await agendamento.update({ paymentStatus: 'pago' });
+    const amount = Number(plain.aula?.valor);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      throw new HttpError(400, 'Não foi possível identificar o valor desta aula.');
+    }
+
+    const payment = await PaymentClientService.simulate(
+      agendamento.id,
+      amount,
+      paymentPayload,
+    );
+
+    if (payment.status !== 'approved') {
+      throw new HttpError(402, payment.message);
+    }
+
+    await agendamento.update({
+      paymentStatus: 'pago',
+      paymentTransactionId: payment.transactionId,
+      paymentMethod: paymentPayload.method,
+      paymentPaidAt: new Date(),
+    });
     await CacheService.invalidate('aulas');
 
     return AgendamentoService.findById(id);

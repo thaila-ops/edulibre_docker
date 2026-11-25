@@ -1,7 +1,40 @@
+import { useState } from 'react';
 import Feedback from '../components/Feedback';
 import StatsGrid from '../components/StatsGrid';
 import LessonModerationCard from '../components/admin/LessonModerationCard';
 import useAdminDashboard from '../hooks/useAdminDashboard';
+import {
+  AnnouncementTemplateKey,
+  publishAnnouncement,
+} from '../services/admin';
+import { getErrorMessage } from '../utils/validation';
+
+const QUICK_ANNOUNCEMENTS: Array<{
+  key: AnnouncementTemplateKey;
+  label: string;
+  description: string;
+}> = [
+  {
+    key: 'maintenance',
+    label: 'Manutenção programada',
+    description: 'Avise sobre uma janela de manutenção.',
+  },
+  {
+    key: 'instability',
+    label: 'Instabilidade',
+    description: 'Informe que a equipe está analisando um problema.',
+  },
+  {
+    key: 'restored',
+    label: 'Serviço normalizado',
+    description: 'Comunique que a plataforma voltou ao normal.',
+  },
+  {
+    key: 'news',
+    label: 'Novidades',
+    description: 'Convide os usuários a explorar recursos novos.',
+  },
+];
 
 function AdminDashboardPage() {
   const {
@@ -13,6 +46,23 @@ function AdminDashboardPage() {
     handleBlock,
     handleUnblock,
   } = useAdminDashboard();
+  const [announcementLoading, setAnnouncementLoading] = useState<AnnouncementTemplateKey | null>(null);
+  const [announcementFeedback, setAnnouncementFeedback] = useState('');
+  const [announcementError, setAnnouncementError] = useState('');
+
+  async function handleAnnouncement(templateKey: AnnouncementTemplateKey) {
+    try {
+      setAnnouncementError('');
+      setAnnouncementFeedback('');
+      setAnnouncementLoading(templateKey);
+      const announcement = await publishAnnouncement(templateKey);
+      setAnnouncementFeedback(`Comunicado “${announcement.title}” enviado aos usuários conectados.`);
+    } catch (requestError) {
+      setAnnouncementError(getErrorMessage(requestError));
+    } finally {
+      setAnnouncementLoading(null);
+    }
+  }
 
   if (loading) {
     return (
@@ -48,6 +98,32 @@ function AdminDashboardPage() {
           ]}
         />
       ) : null}
+
+      <section className="form-card announcement-panel">
+        <p className="eyebrow">Mensageria em tempo real</p>
+        <h2>Comunicados rápidos</h2>
+        <p className="muted">
+          Dispare um aviso pré-configurado para todos os usuários conectados agora.
+        </p>
+        <div className="announcement-grid">
+          {QUICK_ANNOUNCEMENTS.map((announcement) => (
+            <article className="announcement-card" key={announcement.key}>
+              <h3>{announcement.label}</h3>
+              <p>{announcement.description}</p>
+              <button
+                className="secondary-button"
+                type="button"
+                disabled={announcementLoading !== null}
+                onClick={() => void handleAnnouncement(announcement.key)}
+              >
+                {announcementLoading === announcement.key ? 'Enviando...' : 'Enviar comunicado'}
+              </button>
+            </article>
+          ))}
+        </div>
+        {announcementFeedback ? <Feedback variant="success" message={announcementFeedback} /> : null}
+        {announcementError ? <Feedback message={announcementError} /> : null}
+      </section>
 
       <section className="form-card">
         <h2>Moderar aulas</h2>

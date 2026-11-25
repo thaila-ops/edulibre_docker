@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Feedback from '../components/Feedback';
-import { payBooking, fetchBooking } from '../services/bookings';
+import { fetchBooking } from '../services/bookings';
 import { Booking } from '../types';
 import { getErrorMessage } from '../utils/validation';
 
@@ -14,16 +14,6 @@ function BookingDetailPage() {
     if (!id) return;
     fetchBooking(id).then(setBooking).catch((requestError) => setError(getErrorMessage(requestError)));
   }, [id]);
-
-  async function handlePay() {
-    if (!booking) return;
-    try {
-      const updated = await payBooking(booking.id);
-      setBooking(updated);
-    } catch (submitError) {
-      setError(getErrorMessage(submitError));
-    }
-  }
 
   function getRequestStatusLabel(status?: Booking['bookingStatus']) {
     if (status === 'aceito') return 'Aprovado';
@@ -49,20 +39,29 @@ function BookingDetailPage() {
         <p className="muted">Data: {new Date(booking.data).toLocaleString('pt-BR')}</p>
         <p><strong>Status da solicitação:</strong> <span className={getRequestStatusClass(booking.bookingStatus)}>{getRequestStatusLabel(booking.bookingStatus)}</span></p>
         <p><strong>Status do pagamento:</strong> {booking.paymentStatus}</p>
+        {booking.paymentStatus === 'pago' && booking.paymentMethod ? (
+          <p><strong>Forma de pagamento:</strong> {booking.paymentMethod === 'pix' ? 'Pix' : 'Cartão'}</p>
+        ) : null}
+        {booking.paymentStatus === 'pago' && booking.paymentTransactionId ? (
+          <p><strong>Comprovante:</strong> {booking.paymentTransactionId}</p>
+        ) : null}
+        {booking.paymentStatus === 'pago' && booking.paymentPaidAt ? (
+          <p><strong>Pago em:</strong> {new Date(booking.paymentPaidAt).toLocaleString('pt-BR')}</p>
+        ) : null}
         <div className="hero-actions">
-          <button
-            className="primary-button"
-            onClick={handlePay}
-            disabled={booking.paymentStatus === 'pago' || booking.bookingStatus !== 'aceito'}
-          >
-            {booking.paymentStatus === 'pago'
-              ? 'Pago'
-              : booking.bookingStatus === 'aceito'
-                ? 'Pagamento de teste'
+          {booking.paymentStatus !== 'pago' && booking.bookingStatus === 'aceito' ? (
+            <Link className="primary-button" to={`/agendamentos/${booking.id}/pagamento`}>
+              Ir para pagamento
+            </Link>
+          ) : (
+            <button className="primary-button" disabled>
+              {booking.paymentStatus === 'pago'
+                ? 'Pago'
                 : booking.bookingStatus === 'recusado'
                   ? 'Recusado pelo professor'
                   : 'Aguardando aceite do professor'}
-          </button>
+            </button>
+          )}
           <Link className="secondary-button" to="/agendamentos">Voltar</Link>
         </div>
       </section>

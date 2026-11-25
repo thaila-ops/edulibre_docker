@@ -35,6 +35,23 @@ services:
       start_period: 5s
     networks:
       - internal_network 
+
+  pagamento-service:
+    build:
+      context: ./pagamento-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      PORT: 3002
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3002/health').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - internal_network
+
   backend:
     build:
       context: ./EduLibre_BackEnd-main
@@ -49,6 +66,7 @@ services:
       CACHE_TTL_SECONDS: ${CACHE_TTL_SECONDS:-60}
       MEDIA_SERVICE_URL: http://media_optimization:3000
       MEDIA_INTERNAL_API_KEY: ${MEDIA_INTERNAL_API_KEY}
+      PAYMENT_SERVICE_URL: http://pagamento-service:3002
       DB_HOST: ${DB_HOST:-database}
       DB_PORT: 3306
       DB_NAME: ${DB_NAME:-edulivre}
@@ -63,6 +81,8 @@ services:
         condition: service_healthy
       media_optimization:
         condition: service_healthy
+      pagamento-service:
+        condition: service_healthy
 
   media_optimization:
     build:
@@ -72,6 +92,12 @@ services:
     restart: unless-stopped
     environment:
       MEDIA_INTERNAL_API_KEY: ${MEDIA_INTERNAL_API_KEY}
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/health').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))\""]
+      interval: 20s
+      timeout: 15s
+      retries: 5
+      start_period: 30s
     networks:
       - internal_network
 

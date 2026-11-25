@@ -17,6 +17,7 @@ import ReceivedBookingsPage from '../pages/ReceivedBookingsPage';
 import SignupPage from '../pages/SignupPage';
 import UserFormPage from '../pages/UserFormPage';
 import PasswordResetPage from '../pages/PasswordResetPage';
+import PaymentPage from '../pages/PaymentPage';
 
 export default function AppRoutes() {
   return (
@@ -30,6 +31,7 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route path="/agendamentos" element={<BookingsPage />} />
         <Route path="/agendamentos/:id" element={<BookingDetailPage />} />
+        <Route path="/agendamentos/:id/pagamento" element={<PaymentPage />} />
         <Route path="/agendar-aula/:id" element={<BookingFormPage />} />
         <Route path="/agendamentos/:id/editar" element={<BookingFormPage />} />
         <Route path="/conta" element={<DashboardPage />} />

@@ -47,6 +47,9 @@ export type Booking = {
   data: string;
   bookingStatus?: 'pendente' | 'aceito' | 'recusado';
   paymentStatus?: 'pendente' | 'pago';
+  paymentTransactionId?: string | null;
+  paymentMethod?: 'pix' | 'card' | null;
+  paymentPaidAt?: string | null;
   aluno?: User;
   aula?: Lesson;
 };

@@ -42,6 +42,7 @@ class AgendamentosController {
     const agendamento = await AgendamentoService.pay(
       Number(req.params.id),
       authUserId,
+      req.body,
     );
     res.status(200).json(agendamento);
   });

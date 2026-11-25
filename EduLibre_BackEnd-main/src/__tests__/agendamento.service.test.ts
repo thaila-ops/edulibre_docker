@@ -1,6 +1,7 @@
 import Agendamento from '../models/Agendamento';
 import AgendamentoService from '../services/agendamento.service';
 import CacheService from '../services/cache.service';
+import PaymentClientService from '../services/payment-client.service';
 import Aula from '../models/Aula';
 import User from '../models/User';
 
@@ -8,6 +9,13 @@ jest.mock('../services/cache.service', () => ({
   __esModule: true,
   default: {
     invalidate: jest.fn(),
+  },
+}));
+
+jest.mock('../services/payment-client.service', () => ({
+  __esModule: true,
+  default: {
+    simulate: jest.fn(),
   },
 }));
 
@@ -28,6 +36,16 @@ describe('Invalidação do cache de agendamentos', () => {
 
     jest.spyOn(Agendamento, 'findByPk').mockResolvedValue(agendamento);
     jest.mocked(CacheService.invalidate).mockResolvedValue(true);
+    jest.mocked(PaymentClientService.simulate).mockResolvedValue({
+      transactionId: 'payment-test',
+      status: 'approved',
+      message: 'Pagamento aprovado.',
+    });
+    jest.spyOn(agendamento, 'toJSON').mockImplementation(() => ({
+      ...agendamento.get(),
+      aula: { valor: 50 },
+      paymentStatus: agendamento.getDataValue('paymentStatus'),
+    }) as never);
   });
 
   afterEach(() => {
@@ -43,9 +61,14 @@ describe('Invalidação do cache de agendamentos', () => {
         return agendamento;
       });
 
-    const resultado = await AgendamentoService.pay(1, 10);
+    const resultado = await AgendamentoService.pay(1, 10, { method: 'pix' });
 
-    expect(update).toHaveBeenCalledWith({ paymentStatus: 'pago' });
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({
+      paymentStatus: 'pago',
+      paymentTransactionId: 'payment-test',
+      paymentMethod: 'pix',
+      paymentPaidAt: expect.any(Date),
+    }));
     expect(resultado.paymentStatus).toBe('pago');
     expect(CacheService.invalidate).toHaveBeenCalledTimes(1);
     expect(CacheService.invalidate).toHaveBeenCalledWith('aulas');
@@ -57,7 +80,7 @@ describe('Invalidação do cache de agendamentos', () => {
     );
 
     await expect(
-      AgendamentoService.pay(1, 10),
+      AgendamentoService.pay(1, 10, { method: 'pix' }),
     ).rejects.toThrow('Falha ao salvar pagamento');
 
     expect(CacheService.invalidate).not.toHaveBeenCalled();
@@ -68,7 +91,7 @@ describe('Invalidação do cache de agendamentos', () => {
       .mockResolvedValue(agendamento);
 
     await expect(
-      AgendamentoService.pay(1, 99),
+      AgendamentoService.pay(1, 99, { method: 'pix' }),
     ).rejects.toMatchObject({ statusCode: 403 });
 
     expect(update).not.toHaveBeenCalled();
